@@ -2,7 +2,9 @@
 
 ## 🟦 Fase 1: Investigación y Configuración (Semanas 1-2)
 - [ ] **Selección del Dataset:** Identificar y descargar un dataset público de alta sensibilidad (Finanzas o Salud).
-- [ ] **Revisión Bibliográfica:** Estudiar a fondo las arquitecturas CTGAN, TVAE y Tabular Diffusion.
+- [ ] **Revisión Bibliográfica:**
+    - [ ] **Lectura profunda de los papers de la propuesta**
+    - [ ] **Estudio de las arquitecturas**: CTGAN, TVAE y Tabular Diffusion.
 - [ ] **Análisis de Privacidad:** Definir los límites de la normativa GDPR aplicados al proyecto.
 - [ ] **Entorno de Desarrollo:** Configurar el entorno virtual con **PyTorch** y dependencias necesarias.
 
