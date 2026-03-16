@@ -41,9 +41,17 @@ docker compose up --build -d
 ```
 Para comprobar si se detecta la tarjeta gráfica (En mi caso RX9070), ejecutar:
 ```
-docker compose exec tfm-ia python3 -c "import torch; print(f'¿GPU detectada?: {torch.cuda.is_available()}'); print(f'Dispositivo: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"Ninguno\"}')"
+docker compose exec tfm python3 -c "import torch; print(f'¿GPU detectada?: {torch.cuda.is_available()}'); print(f'Dispositivo: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"Ninguno\"}')"
 ```
 Para ejecutar el contenedor
 ```
-docker compose exec tfm-ia /bin/bash
+docker compose exec tfm /bin/bash
+```
+Para entrar a Jupyter Lab, entrar en un buscado a:
+```
+http://localhost:8888
+```
+Si pide un token, conseguirlo ejecutando:
+```
+docker compose logs tfm
 ```
