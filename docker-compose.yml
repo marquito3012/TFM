@@ -1,0 +1,23 @@
+services:
+  tfm-ia:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tfm
+    # Acceso a la GPU AMD (Crítico para ROCm)
+    devices:
+      - "/dev/kfd:/dev/kfd"
+      - "/dev/dri:/dev/dri"
+    # Mantenemos el contenedor abierto para interactuar
+    tty: true
+    stdin_open: true
+    # Sincronización de archivos (Host:Contenedor)
+    volumes:
+      - .:/compartida
+    # Puerto para Jupyter Lab
+    ports:
+      - "8888:8888"
+    # Límites de memoria compartida (importante para entrenamiento de modelos pesados)
+    shm_size: '8gb'
+    environment:
+      - PYTHONUNBUFFERED=1

@@ -34,3 +34,9 @@
 - [ ] **Escalabilidad:** Evaluar la integración en flujos MLOps y manejo de datos PII.
 - [ ] **Redacción de Memoria:** Completar los 8 capítulos del índice propuesto.
 - [ ] **Bibliografía:** Asegurar que todas las referencias (El Emam, Stadler, Xu, etc.) estén correctamente citadas.
+
+Para construir la imágen de docker, usamos (`--build` fuerza a Docker a leer la `Dockerfile` e instalar todas las dependencias del `requirements.txt`):
+```
+docker compose up --build -d
+```
+Para 

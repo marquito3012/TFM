@@ -1,0 +1,17 @@
+# Análisis y Procesamiento
+pandas
+numpy
+scipy
+scikit-learn
+
+# IA Generativa y SDV (Específicos de tu TFM)
+sdv
+ctgan
+rdt
+
+# Visualización para la Memoria
+matplotlib
+seaborn
+
+# Entorno de trabajo
+jupyterlab
