@@ -39,4 +39,11 @@ Para construir la imágen de docker, usamos (`--build` fuerza a Docker a leer la
 ```
 docker compose up --build -d
 ```
-Para 
+Para comprobar si se detecta la tarjeta gráfica (En mi caso RX9070), ejecutar:
+```
+docker compose exec tfm-ia python3 -c "import torch; print(f'¿GPU detectada?: {torch.cuda.is_available()}'); print(f'Dispositivo: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"Ninguno\"}')"
+```
+Para ejecutar el contenedor
+```
+docker compose exec tfm-ia /bin/bash
+```

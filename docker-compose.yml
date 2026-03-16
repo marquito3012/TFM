@@ -13,7 +13,7 @@ services:
     stdin_open: true
     # Sincronización de archivos (Host:Contenedor)
     volumes:
-      - .:/compartida
+      - ./compartida:/compartida
     # Puerto para Jupyter Lab
     ports:
       - "8888:8888"
