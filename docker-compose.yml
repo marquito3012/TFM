@@ -1,5 +1,5 @@
 services:
-  tfm-ia:
+  tfm:
     build:
       context: .
       dockerfile: Dockerfile
