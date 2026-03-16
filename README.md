@@ -1,7 +1,7 @@
 # TFM
 
 ## 🟦 Fase 1: Investigación y Configuración (Semanas 1-2)
-- [ ] **Selección del Dataset:** Identificar y descargar un dataset público de alta sensibilidad (Finanzas o Salud).
+- [x] **Selección del Dataset:** Identificar y descargar un dataset público de alta sensibilidad (Finanzas o Salud). **Decidí elegir el conjunto de datos [Diabetes 130-US Hospitals for Years 1999-2008](https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008)
 - [ ] **Revisión Bibliográfica:**
     - [ ] **Lectura profunda de los papers de la propuesta**
     - [ ] **Estudio de las arquitecturas**: CTGAN, TVAE y Tabular Diffusion.
