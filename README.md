@@ -51,7 +51,3 @@ Para entrar a Jupyter Lab, entrar en un buscado a:
 ```
 http://localhost:8888
 ```
-Si pide un token, conseguirlo ejecutando:
-```
-docker compose logs tfm
-```
