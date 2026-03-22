@@ -2,11 +2,29 @@
 
 ## 🟦 Fase 1: Investigación y Configuración (Semanas 1-2)
 - [x] **Selección del Dataset:** Identificar y descargar un dataset público de alta sensibilidad (Finanzas o Salud). **Decidí elegir el conjunto de datos [Diabetes 130-US Hospitals for Years 1999-2008](https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008)
-- [ ] **Revisión Bibliográfica:**
-    - [ ] **Lectura profunda de los papers de la propuesta**
-    - [ ] **Estudio de las arquitecturas**: CTGAN, TVAE y Tabular Diffusion.
+- [x] **Revisión Bibliográfica:**
+    - [x] **Lectura profunda de los papers de la propuesta**
+    - [x] **Estudio de las arquitecturas**: CTGAN, TVAE y Tabular Diffusion.
+     
+      * **CTGAN (Conditional Tabular GAN):** Se basa en un juego de suma cero entre un generador y un discriminador. Su innovación es el **entrenamiento condicional**, que permite balancear clases minoritarias al "forzar" al modelo a generar ejemplos de categorías poco comunes.
+      * **TVAE (Tabular Variational Autoencoder):** Utiliza un codificador para comprimir los datos en un espacio latente y un decodificador para reconstruirlos. Es mucho más estable y rápido de entrenar que las GAN, siendo ideal para datasets masivos donde la eficiencia es clave.
+      * **Tabular Diffusion (TabDDPM):** Representa el estado del arte actual. Aprende a revertir un proceso de degradación de datos (ruido). Aunque es computacionalmente costoso, captura correlaciones complejas y distribuciones multimodales con una precisión que supera a los modelos anteriores.
+
+        | Característica | CTGAN | TVAE | Tabular Diffusion (TabDDPM) |
+        | :--- | :--- | :--- | :--- |
+        | **Arquitectura Base** | GAN (Redes Adversarias) | VAE (Autoencoder Variacional) | Modelo de Difusión Probabilística |
+        | **Mecanismo Clave** | Generador Condicional | Espacio Latente Probabilístico | Difusión Reversa (Denoising) |
+        | **Estabilidad** | Baja (propenso a colapso de modo) | Alta (convergencia rápida) | Muy Alta (proceso iterativo robusto) |
+        | **Velocidad de Entrenamiento** | Media | **Muy Rápida** | Lenta |
+        | **Calidad Estadística** | Buena | Media (tiende a "suavizar" bordes) | **Excelente (Estado del arte)** |
+        | **Manejo de Categorías** | Excelente (vía muestreo condicional) | Bueno (vía Softmax/Cross-entropy) | Excelente (vía Cadenas de Markov) |
+        | **Complejidad de Uso** | Media (ajuste de hiperparámetros) | Baja | Alta (requiere más recursos de GPU) |
+
+        **Usa CTGAN si:** Tienes un dataset con un desequilibrio de clases muy marcado (ej. detección de fraudes).
+        **Usa TVAE si:** Necesitas generar datos rápidamente o tienes recursos computacionales limitados.
+        **Usa Tabular Diffusion si:** La fidelidad de los datos es crítica y no te importa el tiempo de cómputo (ej. investigación médica o financiera).
 - [ ] **Análisis de Privacidad:** Definir los límites de la normativa GDPR aplicados al proyecto.
-- [ ] **Entorno de Desarrollo:** Configurar el entorno virtual con **PyTorch** y dependencias necesarias.
+- [x] **Entorno de Desarrollo:** Configurar el entorno virtual con **PyTorch** y dependencias necesarias.
 
 ## 🟨 Fase 2: Ingeniería de Datos y Pre-procesamiento (Semanas 3-4)
 - [ ] **Limpieza de Datos:** Tratamiento de valores nulos y outliers en el dataset original.
