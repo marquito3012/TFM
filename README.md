@@ -32,7 +32,7 @@
 - [ ] **Codificación:** Manejar variables categóricas de alta cardinalidad y normalización de continuas.
 
 ## 🟩 Fase 3: Implementación del Motor Generativo (Semanas 5-7)
-- [ ] **Desarrollo del Modelo:** Programar la arquitectura seleccionada (CTGAN o TVAE) en PyTorch.
+- [ ] **Desarrollo del Modelo:** Programar la arquitectura seleccionada (CTGAN, TVAE o Tabular Diffusion) en PyTorch.
 - [ ] **Entrenamiento:** Configurar el bucle de entrenamiento y funciones de pérdida.
 - [ ] **Optimización:** Ajuste de hiperparámetros para evitar *mode collapse* y *overfitting*.
 - [ ] **Espacio Latente:** Validar la transformación de datos brutos al espacio latente.
