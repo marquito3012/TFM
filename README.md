@@ -23,7 +23,18 @@
         **Usa CTGAN si:** Tienes un dataset con un desequilibrio de clases muy marcado (ej. detección de fraudes).
         **Usa TVAE si:** Necesitas generar datos rápidamente o tienes recursos computacionales limitados.
         **Usa Tabular Diffusion si:** La fidelidad de los datos es crítica y no te importa el tiempo de cómputo (ej. investigación médica o financiera).
-- [ ] **Análisis de Privacidad:** Definir los límites de la normativa GDPR aplicados al proyecto.
+- [x] **Análisis de Privacidad:** Definir los límites de la normativa GDPR aplicados al proyecto.
+  Diferencia entre Datos Personales y Datos Anónimos:
+    - Datos personales: se refiere a cualquier información relacionada con una persona física identificada o identificable. Aquí el GDPR aplica con toda su dureza.
+    - Datos anónimos: información que no se refiere a una persona identificable. El GDPR estipula explícitamente que no se aplica a los datos anónimos.
+
+  El objetivo legal del TFM es demostrar matemáticamente que los datos sintéticos cruzan esa frontera y se convierten en datos anónimos, evadiendo así las restricciones del GDPR.
+
+  Se pueden establecer 3 límites legales para que los datos sintéticos estén fuera del alcance del GDPR:
+
+  1. Riesgo de Re-identificación: ¿Puede un atacante aislar un registro sintético y vincularlo a una persona real? **Solución** -> Utilizar la métrica Distance to Closest Record (DCR). Con ella, se demuestra que el modelo no ha memorizado los datos de entrenamiento y que ningún registro sintético es una copia exacta de uno real.
+  2. Riesgo de Inferencia: ¿Puede alguien deducir información sensible cruzando el dataset sintético con otras bases de datos públicas? **Solución** -> La simulación de Ataques de Inferencia de Membresía (MIA). Se evalúa si un atacante externo podría llegar a determinar si un individuo específico formó parte del dataset original usado para entrenar. Esto garantiza un nivel robusto ante auditorías.
+  3. Minimización de Datos y Propósito: Las empresas no pueden dar acceso a datos sensibles (PII) indiscriminadamente para hacer pruebas. **Solución** -> El análisis de viabilidad empresarial. Se demostrará que la solución permite a los equipos de MLOps innovar sin tocar datos PII, mejorando drásticamente el "Time-to-Data".
 - [x] **Entorno de Desarrollo:** Configurar el entorno virtual con **PyTorch** y dependencias necesarias.
 
 ## 🟨 Fase 2: Ingeniería de Datos y Pre-procesamiento (Semanas 3-4)
