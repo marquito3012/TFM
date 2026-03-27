@@ -38,6 +38,7 @@
 - [x] **Entorno de Desarrollo:** Configurar el entorno virtual con **PyTorch** y dependencias necesarias.
 
 ## 🟨 Fase 2: Ingeniería de Datos y Pre-procesamiento (Semanas 3-4)
+- [ ] **Análisis exploratorio de los Datos:** Exploración de los datos profundos para su comprensión.
 - [ ] **Limpieza de Datos:** Tratamiento de valores nulos y outliers en el dataset original.
 - [ ] **Transformaciones RDT:** Implementar Reversible Data Transforms para columnas no gaussianas.
 - [ ] **Codificación:** Manejar variables categóricas de alta cardinalidad y normalización de continuas.
