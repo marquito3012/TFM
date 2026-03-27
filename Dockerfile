@@ -1,13 +1,13 @@
-FROM rocm/pytorch:latest
+# FROM rocm/pytorch:latest (Usa esta para el PC de sobremesa con GPU AMD)
+FROM python:3.10-slim
 
 # 1. Configuración de zona horaria y sistema
 ENV TZ=Europe/Madrid
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     python3-dev \
-    python-is-python3 \
-    python3-pip \
     git \
     && rm -rf /var/lib/apt/lists/*
 

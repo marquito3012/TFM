@@ -4,10 +4,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: tfm
-    # Acceso a la GPU AMD (Crítico para ROCm)
-    devices:
-      - "/dev/kfd:/dev/kfd"
-      - "/dev/dri:/dev/dri"
+    # Acceso a la GPU AMD (Comentado para Laptop/APU)
+    # devices:
+    #   - "/dev/kfd:/dev/kfd"
+    #   - "/dev/dri:/dev/dri"
+    shm_size: '2gb' # Reducido para laptop
     # Mantenemos el contenedor abierto para interactuar
     tty: true
     stdin_open: true
@@ -17,8 +18,7 @@ services:
     # Puerto para Jupyter Lab
     ports:
       - "8888:8888"
-    # Límites de memoria compartida (importante para entrenamiento de modelos pesados)
-    shm_size: '8gb'
+    # shm_size: '8gb'
     environment:
       - PYTHONUNBUFFERED=1
     command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''
