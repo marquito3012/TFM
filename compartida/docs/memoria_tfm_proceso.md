@@ -18,11 +18,24 @@
 
 ---
 
+## 📅 Fase 2: Ingeniería de Datos y Preprocesamiento
+
+### Hitos Alcanzados
+- [x] **Limpieza de Ruido**: Eliminación de 2,423 registros no elegibles (fallecidos).
+- [x] **Agrupación ICD-9**: Reducción de dimensionalidad categórica mediante mapeo clínico. Esto facilitará que la GAN aprenda distribuciones de diagnósticos más robustas.
+- [x] **Sintetización de Historial**: La variable `prior_visits` captura la recurrencia del paciente en un solo vector.
+
+### Justificación de Decisiones para la Memoria
+- **Mapeo ICD-9**: Se utilizó la clasificación estándar de la literatura (Strack et al.) para agrupar códigos. Esto no solo mejora el rendimiento de los modelos, sino que reduce la probabilidad de "Overfitting" en códigos de baja frecuencia.
+- **Eliminación de Medicamentos Residuales**: Se eliminaron fármacos como `troglitazone` o `acetohexamide` debido a que su varianza es casi nula y no aportan información discriminativa al modelo.
+
+---
+
 ## 📅 Seguimiento de Tareas Técnicas
 - [x] Ejecución de EDA detallado.
 - [x] Redacción de informe de hallazgos.
-- [ ] Limpieza definitiva del dataset y Feature Engineering.
-- [ ] Entrenamiento de modelos base (Random Forest/XGBoost).
+- [x] Limpieza definitiva del dataset y Feature Engineering.
+- [ ] Implementación de arquitecturas PyTorch (CTGAN/TVAE/TabDDPM).
 - [ ] Evaluación preliminar de métricas de readmisión.
 
 ---

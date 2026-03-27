@@ -38,13 +38,17 @@
 - [x] **Entorno de Desarrollo:** Configurar el entorno virtual con **PyTorch** y dependencias necesarias.
 
 ## 🟨 Fase 2: Ingeniería de Datos y Pre-procesamiento (Semanas 3-4)
-- [ ] **Análisis exploratorio de los Datos:** Exploración de los datos profundos para su comprensión.
-- [ ] **Limpieza de Datos:** Tratamiento de valores nulos y outliers en el dataset original.
-- [ ] **Transformaciones RDT:** Implementar Reversible Data Transforms para columnas no gaussianas.
-- [ ] **Codificación:** Manejar variables categóricas de alta cardinalidad y normalización de continuas.
+- [x] **Análisis exploratorio de los Datos:** Finalizado. Se ha generado un informe detallado con los siguientes hallazgos:
+    - **Calidad de Datos:** Variables con alta tasa de nulos (`weight` 97%, `max_glu_serum` 95%, `A1Cresult` 83%).
+    - **Criterio de Exclusión:** Identificación de 2,306 registros correspondientes a fallecimientos/hospice que deben filtrarse para el modelo de readmisión.
+    - **Distribución de Clases:** La clase menoritaria `<30` (11.1%) confirma la necesidad de SMOTE o modelos generativos balanceados.
+    - **Medicación:** Análisis de prevalencia de Insulina y Metformina como ejes del tratamiento.
+- [x] **Limpieza de Datos:** Eliminación de 2,423 registros (fallecidos/hospice) y depuración de columnas irrelevantes o con nulos extremos.
+- [x] **Agrupación ICD-9:** Consolidación de diagnósticos en 9 categorías clínicas para optimizar el aprendizaje del motor generativo.
+- [x] **Ingeniería de Variables:** Creación de variables sintéticas como `prior_visits` y normalización visual del dataset.
 
 ## 🟩 Fase 3: Implementación del Motor Generativo (Semanas 5-7)
-- [ ] **Desarrollo del Modelo:** Programar la arquitectura seleccionada (CTGAN, TVAE o Tabular Diffusion) en PyTorch.
+- [ ] **Desarrollo del Modelo:** Programar las diferentes arquitecturas seleccionadas (CTGAN, TVAE y Tabular Diffusion) en PyTorch.
 - [ ] **Entrenamiento:** Configurar el bucle de entrenamiento y funciones de pérdida.
 - [ ] **Optimización:** Ajuste de hiperparámetros para evitar *mode collapse* y *overfitting*.
 - [ ] **Espacio Latente:** Validar la transformación de datos brutos al espacio latente.
