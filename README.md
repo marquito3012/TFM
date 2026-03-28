@@ -1,4 +1,64 @@
-# TFM
+# 🎓 TFM: Generación de Datos Sintéticos para Sectores Sensibles
+
+<p align="left">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Jupyter-F37626.svg?&style=for-the-badge&logo=Jupyter&logoColor=white" alt="Jupyter Notebook" />
+</p>
+
+## 🎯 Objetivo del Proyecto
+El objetivo principal de este Trabajo de Fin de Máster es desarrollar y evaluar un framework de IA Generativa capaz de producir datos tabulares sintéticos. La meta es demostrar matemáticamente que los datos sintéticos cruzan la frontera legal para convertirse en **datos anónimos**, evadiendo así las restricciones del **GDPR**, mientras mantienen una alta utilidad estadística para el entrenamiento de modelos de Machine Learning en sectores críticos (Finanzas/Salud).
+
+## 📊 Dataset y Pre-procesamiento
+Para este proyecto se utiliza el dataset público **[Diabetes 130-US Hospitals for Years 1999-2008](https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008)**. 
+
+Se ha realizado una exhaustiva ingeniería de datos que incluye:
+- Depuración de variables con nulos extremos (ej. `weight`, `max_glu_serum`).
+- Exclusión de pacientes fallecidos/hospice para modelos de readmisión.
+- Consolidación de diagnósticos en 9 categorías clínicas (Agrupación ICD-9).
+- Creación de variables sintéticas y normalización del dataset.
+
+## 🧠 Arquitecturas Generativas Analizadas
+El núcleo del proyecto evalúa y compara tres enfoques punteros en la generación de datos tabulares:
+
+| Característica | CTGAN | TVAE | Tabular Diffusion (TabDDPM) |
+| :--- | :--- | :--- | :--- |
+| **Arquitectura Base** | GAN (Redes Adversarias) | VAE (Autoencoder Variacional) | Modelo de Difusión Probabilística |
+| **Mecanismo Clave** | Generador Condicional | Espacio Latente Probabilístico | Difusión Reversa (Denoising) |
+| **Estabilidad** | Baja (propenso a colapso de modo) | Alta (convergencia rápida) | Muy Alta (proceso iterativo robusto) |
+| **Velocidad de Entrenamiento** | Media | **Muy Rápida** | Lenta |
+| **Calidad Estadística** | Buena | Media (tiende a "suavizar" bordes) | **Excelente (Estado del arte)** |
+| **Manejo de Categorías** | Excelente (vía muestreo condicional) | Bueno (vía Softmax/Cross-entropy) | Excelente (vía Cadenas de Markov) |
+
+## 🛡️ Privacidad y Cumplimiento Normativo (GDPR)
+Para garantizar que los datos sintéticos no exponen información de los sujetos originales, el modelo se somete a rigurosas validaciones:
+1. **Riesgo de Re-identificación (DCR):** Uso de la métrica *Distance to Closest Record* para demostrar que el modelo no memoriza datos y no genera copias exactas.
+2. **Riesgo de Inferencia (MIA):** Simulación de Ataques de Inferencia de Membresía para asegurar que un atacante no pueda deducir si un individuo pertenecía al dataset original de entrenamiento.
+3. **Minimización de Datos:** Mejora del "Time-to-Data" empresarial, permitiendo a los equipos de MLOps innovar sin interactuar con datos PII.
+
+---
+
+## 🚀 Instalación y Uso (Entorno Docker)
+
+El proyecto está dockerizado para garantizar la reproducibilidad del entorno y aprovechar la aceleración por hardware.
+
+1. **Construir y levantar el contenedor:**
+   ```bash
+   docker compose up --build -d
+   ```
+2. **Comprobar la detección de la GPU:**
+   ```bash
+    docker compose exec tfm python3 -c "import torch; print(f'¿GPU detectada?: {torch.cuda.is_available()}'); print(f'Dispositivo: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"Ninguno\"}')" 
+   ```
+3. **Acceder a la consola del contenedor (opcional):**
+   ```bash
+   docker compose exec tfm /bin/bash
+   ```
+4. **Abrir Jupyter Lab:**
+   Acceder desde tu navegador a: `http://localhost:8888`
+
+# Roadmap del Proyecto
 
 ## 🟦 Fase 1: Investigación y Configuración (Semanas 1-2)
 - [x] **Selección del Dataset:** Identificar y descargar un dataset público de alta sensibilidad (Finanzas o Salud). **Decidí elegir el conjunto de datos [Diabetes 130-US Hospitals for Years 1999-2008](https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008)
