@@ -1,0 +1,68 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Master's thesis (TFM) developing a Generative AI framework to produce synthetic tabular data demonstrating mathematical anonymity under GDPR. Uses the **Diabetes 130-US Hospitals (1999-2008)** dataset from UCI.
+
+**Goal**: Prove synthetic data crosses the legal boundary to become "anonymous data" (GDPR-exempt) while maintaining statistical utility for ML in healthcare/finance.
+
+## Development Commands
+
+```bash
+# Build and start Docker container
+docker compose up --build -d
+
+# Verify GPU detection (AMD RX9070)
+docker compose exec tfm python3 -c "import torch; print(torch.cuda.is_available())"
+
+# Access container shell
+docker compose exec tfm /bin/bash
+
+# Jupyter Lab: http://localhost:8888
+```
+
+## Architecture & Data Flow
+
+```
+compartida/
+├── data/
+│   ├── diabetic_data.csv          # Raw: 101,766 records × 50 vars
+│   ├── diabetic_data_clean.csv    # Processed: 99,340 records × 39 vars
+│   └── IDS_mapping.csv            # ICD-9 diagnosis code mappings
+├── notebooks/
+│   ├── 01_eda_detallado.ipynb     # Exploratory analysis
+│   └── 02_limpieza_ingenieria.ipynb # Cleaning & feature engineering
+└── docs/                          # Spanish reports (EDA, cleaning, process log)
+```
+
+**Pipeline**: Raw CSV → EDA (notebook 01) → Cleaning/Feature Engineering (notebook 02) → Clean CSV → Generative Models (Phase 3) → Evaluation (Phase 4) → Privacy Attacks (Phase 5)
+
+## Tech Stack
+
+- **Python 3.10**, PyTorch, Docker (Python-slim base)
+- **Data**: pandas, numpy, scipy, scikit-learn
+- **Generative**: sdv, ctgan, rdt (Tabular Diffusion/CTGAN/TVAE)
+- **Viz**: matplotlib, seaborn
+- **Dev**: Jupyter Lab (port 8888)
+
+## Key Data Transformations (Completed)
+
+- **Excluded**: 2,423 deceased/hospice patients (`discharge_disposition_id` in [11,13,14,19,20,21])
+- **Removed**: `weight` (97% null), `payer_code` (40% null), low-variance medications
+- **ICD-9 Grouping**: 100s of codes → 9 clinical categories (Circulatory, Respiratory, Digestive, Diabetes, Injury, Genitourinary, Musculoskeletal, Neoplasms, Other)
+- **New Features**: `prior_visits`, `any_med_change`
+- **Target**: `readmitted` (<30, >30, NO) — 11.1% minority class
+
+## Next Implementation Files
+
+- `compartida/notebooks/03_model_implementation.ipynb` — CTGAN/TVAE/TabDDPM
+- `compartida/notebooks/04_evaluation.ipynb` — Fidelity metrics, TSTR validation
+- `compartida/notebooks/05_privacy_attacks.ipynb` — DCR, MIA tests
+
+## Conventions
+
+- Spanish for notebook markdown (documentation language)
+- English for variable names and code comments
+- All work in `compartida/` (Docker mounted volume)

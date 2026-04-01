@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Exploratorio de Datos - TFM Generación de Datos Sintéticos</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info-bg: #eff6ff;
+            --info-border: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-dark);
+            background: var(--bg-light);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            padding: 30px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .toc h2 {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toc ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .toc a {
+            color: var(--primary);
+            text-decoration: none;
+            padding: 6px 12px;
+            background: var(--bg-light);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Main Content */
+        main {
+            background: var(--bg-white);
+            margin: 40px auto;
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 100px;
+        }
+
+        section:last-child {
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: var(--text-dark);
+            margin: 30px 0 15px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-left: 4px solid;
+        }
+
+        .callout-info {
+            background: var(--info-bg);
+            border-color: var(--info-border);
+        }
+
+        .callout-warning {
+            background: #fffbeb;
+            border-color: var(--warning);
+        }
+
+        .callout-success {
+            background: #ecfdf5;
+            border-color: var(--success);
+        }
+
+        .callout-danger {
+            background: #fef2f2;
+            border-color: var(--danger);
+        }
+
+        .callout h4 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-light);
+            font-weight: 600;
+            color: var(--text-dark);
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) {
+            background: var(--bg-light);
+        }
+
+        tr:hover {
+            background: #f1f5f9;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-top: 5px;
+        }
+
+        /* Code blocks */
+        code {
+            background: var(--bg-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Fira Code", "Consolas", monospace;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        /* Print styles */
+        @media print {
+            .toc { display: none; }
+            main { box-shadow: none; margin: 0; padding: 0; }
+            body { background: white; }
+            section { break-inside: avoid; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8rem; }
+            main { padding: 25px; margin: 20px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Análisis Exploratorio de Datos</h1>
+            <p class="subtitle">TFM: Generación de Datos Sintéticos para Sectores Sensibles</p>
+            <span class="badge">Dataset: Diabetes 130-US Hospitals (1999-2008)</span>
+        </div>
+    </header>
+
+    <nav class="toc">
+        <div class="container">
+            <h2>Índice</h2>
+            <ul>
+                <li><a href="#overview">1. Visión General</a></li>
+                <li><a href="#data-quality">2. Calidad de Datos</a></li>
+                <li><a href="#distributions">3. Distribuciones</a></li>
+                <li><a href="#bivariate">4. Análisis Bivariante</a></li>
+                <li><a href="#transformations">5. Transformaciones</a></li>
+                <li><a href="#conclusions">6. Conclusiones</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main>
+            <!-- SECCIÓN 1: VISIÓN GENERAL -->
+            <section id="overview">
+                <h2>1. Visión General</h2>
+
+                <p>Este informe presenta el Análisis Exploratorio de Datos (EDA) exhaustivo realizado sobre el dataset <strong>Diabetes 130-US Hospitals for Years 1999-2008</strong>, obtenido del UCI Machine Learning Repository. Este análisis constituye la Fase 2 del proyecto de TFM, cuyo objetivo es desarrollar un framework de IA Generativa capaz de producir datos tabulares sintéticos que cumplan con los requisitos de anonimización bajo el Reglamento General de Protección de Datos (GDPR).</p>
+
+                <div class="callout callout-info">
+                    <h4>🎯 Objetivo del Análisis</h4>
+                    <p>El EDA tiene tres propósitos fundamentales:</p>
+                    <ul>
+                        <li><strong>Fidelidad de Datos:</strong> Identificar inconsistencias, valores atípicos y problemas de calidad.</li>
+                        <li><strong>Relación con el Target:</strong> Comprender qué variables influyen más en la readmisión hospitalaria.</li>
+                        <li><strong>Preparación para Modelos Generativos:</strong> Evaluar la cardinalidad y distribución de variables para CTGAN, TVAE y Tabular Diffusion.</li>
+                    </ul>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="value">101.766</div>
+                        <div class="label">Registros Iniciales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">50</div>
+                        <div class="label">Variables Originales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">99.340</div>
+                        <div class="label">Registros Finales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">39</div>
+                        <div class="label">Variables Finales</div>
+                    </div>
+                </div>
+
+                <h3>1.1. Contexto del Dataset</h3>
+                <p>El dataset contiene registros de encuentros clínicos de pacientes con diabetes en hospitales de Estados Unidos durante un período de 10 años (1999-2008). Cada registro representa un encuentro hospitalario de un paciente diagnosticado con diabetes, incluyendo información demográfica, procedimientos médicos, medicamentos administrados y el resultado del alta hospitalaria.</p>
+
+                <div class="callout callout-warning">
+                    <h4>⚠️ Consideración GDPR</h4>
+                    <p>Este dataset contiene <strong>datos de salud</strong>, categorizados como "datos sensibles" bajo el Artículo 9 del GDPR. Cualquier uso de estos datos requiere garantías técnicas y organizativas apropiadas. La generación de datos sintéticos que preserven las propiedades estadísticas sin exponer información individual representa una solución para cumplir con el principio de minimización de datos.</p>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 2: CALIDAD DE DATOS -->
+            <section id="data-quality">
+                <h2>2. Calidad de Datos</h2>
+
+                <h3>2.1. Análisis de Datos Faltantes</h3>
+                <p>Se identificaron patrones críticos de valores nulos que determinaron las estrategias de limpieza y exclusión de variables:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Nulos</th>
+                            <th>Porcentaje</th>
+                            <th>Decisión</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>weight</code></td>
+                            <td>98.569</td>
+                            <td>96,8%</td>
+                            <td><strong>Eliminar</strong> - Nulos extremos</td>
+                        </tr>
+                        <tr>
+                            <td><code>max_glu_serum</code></td>
+                            <td>96.420</td>
+                            <td>94,7%</td>
+                            <td><strong>Eliminar</strong> - Nulos extremos</td>
+                        </tr>
+                        <tr>
+                            <td><code>A1Cresult</code></td>
+                            <td>84.748</td>
+                            <td>83,3%</td>
+                            <td><strong>Eliminar</strong> - Nulos extremos</td>
+                        </tr>
+                        <tr>
+                            <td><code>payer_code</code></td>
+                            <td>40.256</td>
+                            <td>39,6%</td>
+                            <td><strong>Eliminar</strong> - Baja relevancia clínica</td>
+                        </tr>
+                        <tr>
+                            <td><code>medical_specialty</code></td>
+                            <td>49.949</td>
+                            <td>49,1%</td>
+                            <td><strong>Imputar</strong> como 'Missing'</td>
+                        </tr>
+                        <tr>
+                            <td><code>race</code></td>
+                            <td>2.273</td>
+                            <td>2,2%</td>
+                            <td><strong>Imputar</strong> con la moda</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-info">
+                    <h4>📊 Estrategia de Imputación</h4>
+                    <p>Para variables categóricas con baja tasa de nulos (<code>race</code>), se utilizó la moda. Para <code>medical_specialty</code>, se creó una categoría explícita 'Missing' que preserva la información sobre la ausencia del dato, lo cual puede ser informativo para los modelos generativos.</p>
+                </div>
+
+                <h3>2.2. Registros Inválidos: Fallecimientos y Hospice</h3>
+                <p>Un hallazgo crítico del EDA fue la identificación de registros correspondientes a pacientes fallecidos o trasladados a cuidados paliativos (hospice). Estos registros representan <strong>falsos negativos</strong> para la variable objetivo <code>readmitted</code>, ya que un paciente fallecido no puede ser readmitido.</p>
+
+                <div class="callout callout-danger">
+                    <h4>⚠️ Criterio de Exclusión</h4>
+                    <p>Se excluyeron <strong>2.423 registros</strong> (2,38% del total) donde <code>discharge_disposition_id</code> toma los valores:</p>
+                    <p><code>[11, 13, 14, 19, 20, 21]</code></p>
+                    <p>Estos códigos corresponden a: fallecimiento en el hospital, traslado a hospice, o muerte en el lugar.</p>
+                </div>
+
+                <p>Adicionalmente, se eliminaron <strong>3 registros</strong> con género 'Unknown/Invalid', resultando en un dataset final de <strong>99.340 registros</strong> para el modelado.</p>
+
+                <h3>2.3. Variables Eliminadas por Baja Varianza</h3>
+                <p>El análisis de medicamentos reveló 7 compuestos con distribución extremadamente sesgada (más del 99% de los registros tienen valor 'No'), lo que las hace irrelevantes para el modelado generativo:</p>
+                <p><code>acetohexamide, troglitazone, examide, citoglipton, glimepiride-pioglitazone, metformin-rosiglitazone, metformin-pioglitazone</code></p>
+            </section>
+
+            <!-- SECCIÓN 3: DISTRIBUCIONES -->
+            <section id="distributions">
+                <h2>3. Distribuciones y Análisis Univariante</h2>
+
+                <h3>3.1. Variables Numéricas</h3>
+                <p>Las variables numéricas continuas muestran distribuciones con sesgo positivo característico de datos de utilización sanitaria:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Media</th>
+                            <th>Mediana</th>
+                            <th>Std Dev</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>time_in_hospital</code></td>
+                            <td>4.3 días</td>
+                            <td>3 días</td>
+                            <td>3.5</td>
+                            <td>Sesgo positivo, máximo 14 días</td>
+                        </tr>
+                        <tr>
+                            <td><code>num_medications</code></td>
+                            <td>11.5</td>
+                            <td>10</td>
+                            <td>7.8</td>
+                            <td>Amplio rango (0-58)</td>
+                        </tr>
+                        <tr>
+                            <td><code>num_lab_procedures</code></td>
+                            <td>26.1</td>
+                            <td>23</td>
+                            <td>15.7</td>
+                            <td>Distribución aproximadamente normal</td>
+                        </tr>
+                        <tr>
+                            <td><code>number_diagnoses</code></td>
+                            <td>5.9</td>
+                            <td>6</td>
+                            <td>2.1</td>
+                            <td>Rango 1-25 diagnósticos</td>
+                        </tr>
+                        <tr>
+                            <td><code>number_inpatient</code></td>
+                            <td>0.9</td>
+                            <td>0</td>
+                            <td>2.2</td>
+                            <td><strong>Cero-inflada</strong>: 60% sin visitas previas</td>
+                        </tr>
+                        <tr>
+                            <td><code>number_emergency</code></td>
+                            <td>0.2</td>
+                            <td>0</td>
+                            <td>0.7</td>
+                            <td><strong>Cero-inflada</strong>: 85% sin visitas ER</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-warning">
+                    <h4>📈 Implicación para Modelos Generativos</h4>
+                    <p>Las variables <code>number_inpatient</code> y <code>number_emergency</code> presentan distribuciones <strong>cero-infladas</strong>, lo que representa un desafío para modelos como CTGAN y TVAE. Los modelos deben capturar esta bimodalidad (probabilidad de cero vs. conteo positivo) para generar datos realistas.</p>
+                </div>
+
+                <h3>3.2. Variables Categóricas</h3>
+
+                <h4>Distribución de la Variable Objetivo: <code>readmitted</code></h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Count</th>
+                            <th>Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>NO (no readmitido)</td>
+                            <td>88.329</td>
+                            <td>88.8%</td>
+                        </tr>
+                        <tr>
+                            <td>&gt;30 días</td>
+                            <td>5.229</td>
+                            <td>5.3%</td>
+                        </tr>
+                        <tr>
+                            <td>&lt;30 días</td>
+                            <td>5.782</td>
+                            <td>5.8%</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-info">
+                    <h4>⚖️ Desequilibrio de Clases</h4>
+                    <p>La variable objetivo presenta un <strong>desequilibrio marcado</strong>: la clase minoritaria combinada (readmisiones) representa solo el <strong>11.1%</strong> del dataset. Este desequilibrio justifica el uso de modelos generativos condicionales (CTGAN) que pueden oversamplear las clases minoritarias durante la generación.</p>
+                </div>
+
+                <h4>Distribución por Edad</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Grupo de Edad</th>
+                            <th>Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>60-70 años</td>
+                            <td>~25%</td>
+                        </tr>
+                        <tr>
+                            <td>70-80 años</td>
+                            <td>~28%</td>
+                        </tr>
+                        <tr>
+                            <td>80-90 años</td>
+                            <td>~22%</td>
+                        </tr>
+                        <tr>
+                            <td>50-60 años</td>
+                            <td>~15%</td>
+                        </tr>
+                        <tr>
+                            <td>Otros</td>
+                            <td>~10%</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Distribución por Etnia</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Etnia</th>
+                            <th>Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Caucásico</td>
+                            <td>~56%</td>
+                        </tr>
+                        <tr>
+                            <td>Afroamericano</td>
+                            <td>~24%</td>
+                        </tr>
+                        <tr>
+                            <td>Hispánico</td>
+                            <td>~8%</td>
+                        </tr>
+                        <tr>
+                            <td>Otros</td>
+                            <td>~12%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- SECCIÓN 4: ANÁLISIS BIVARIANTE -->
+            <section id="bivariate">
+                <h2>4. Análisis Bivariante: Relación con Readmisión</h2>
+
+                <h3>4.1. Variables Asociadas con Readmisión</h3>
+                <p>El análisis bivariante reveló asociaciones importantes entre las variables predictoras y la readmisión hospitalaria:</p>
+
+                <div class="callout callout-success">
+                    <h4>🔍 Hallazgos Clave</h4>
+                    <ul>
+                        <li><strong>number_inpatient:</strong> Los pacientes readmitidos tienen significativamente más visitas hospitalarias previas (media ~3.5 vs ~0.7 en no readmitidos). Esta es la variable predictora más fuerte identificada.</li>
+                        <li><strong>time_in_hospital:</strong> Los pacientes readmitidos tienden a tener estancias hospitalarias ligeramente más largas en el encuentro índice.</li>
+                        <li><strong>number_diagnoses:</strong> Mayor número de diagnósticos se asocia con mayor probabilidad de readmisión.</li>
+                        <li><strong>Insulina:</strong> Los pacientes en tratamiento con insulina muestran tasas de readmisión más altas.</li>
+                    </ul>
+                </div>
+
+                <h3>4.2. Correlaciones entre Variables Numéricas</h3>
+                <p>La matriz de correlación identificó multicolinealidad esperada entre variables de utilización:</p>
+                <ul>
+                    <li><code>number_inpatient</code> correlaciona positivamente con <code>num_medications</code> (r ≈ 0.35) y <code>number_diagnoses</code> (r ≈ 0.28)</li>
+                    <li><code>time_in_hospital</code> correlaciona con <code>num_procedures</code> (r ≈ 0.30)</li>
+                    <li><code>num_lab_procedures</code> correlaciona con <code>number_diagnoses</code> (r ≈ 0.40)</li>
+                </ul>
+
+                <div class="callout callout-info">
+                    <h4>📊 Implicación para Privacidad</h4>
+                    <p>Las correlaciones fuertes entre variables representan un <strong>riesgo de inferencia</strong>: un atacante podría deducir valores sensibles (ej. número de diagnósticos) a partir de variables aparentemente inocuas (ej. número de procedimientos de laboratorio). Los modelos generativos deben preservar estas correlaciones para utilidad estadística, pero el dataset sintético resultante debe ser evaluado con ataques de inferencia de membresía (MIA) para garantizar que no permiten reconstrucción de individuos específicos.</p>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 5: TRANSFORMACIONES -->
+            <section id="transformations">
+                <h2>5. Transformaciones e Ingeniería de Variables</h2>
+
+                <h3>5.1. Agrupación de Diagnósticos ICD-9</h3>
+                <p>Una de las transformaciones más significativas fue la consolidación de cientos de códigos ICD-9 en 9 categorías clínicas manejables. Esta reducción de cardinalidad es esencial para que los modelos generativos aprendan distribuciones significativas.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Rango ICD-9</th>
+                            <th>Count (diag_1)</th>
+                            <th>Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Circulatory</td>
+                            <td>390-459, 785</td>
+                            <td>29.680</td>
+                            <td>29.9%</td>
+                        </tr>
+                        <tr>
+                            <td>Other</td>
+                            <td>V/E codes, otros</td>
+                            <td>17.793</td>
+                            <td>17.9%</td>
+                        </tr>
+                        <tr>
+                            <td>Respiratory</td>
+                            <td>460-519, 786</td>
+                            <td>13.934</td>
+                            <td>14.0%</td>
+                        </tr>
+                        <tr>
+                            <td>Digestive</td>
+                            <td>520-579, 787</td>
+                            <td>9.333</td>
+                            <td>9.4%</td>
+                        </tr>
+                        <tr>
+                            <td>Diabetes</td>
+                            <td>250</td>
+                            <td>8.661</td>
+                            <td>8.7%</td>
+                        </tr>
+                        <tr>
+                            <td>Injury</td>
+                            <td>800-999</td>
+                            <td>6.851</td>
+                            <td>6.9%</td>
+                        </tr>
+                        <tr>
+                            <td>Genitourinary</td>
+                            <td>580-629, 788</td>
+                            <td>5.002</td>
+                            <td>5.0%</td>
+                        </tr>
+                        <tr>
+                            <td>Musculoskeletal</td>
+                            <td>710-739</td>
+                            <td>4.935</td>
+                            <td>5.0%</td>
+                        </tr>
+                        <tr>
+                            <td>Neoplasms</td>
+                            <td>140-239</td>
+                            <td>3.131</td>
+                            <td>3.2%</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-info">
+                    <h4>🎯 Beneficio para Modelos Generativos</h4>
+                    <p>Reducir la cardinalidad de <code>diag_1</code> de ~700 códigos únicos a 9 categorías mejora drásticamente la capacidad del modelo de aprender patrones significativos. Además, esta transformación tiene un <strong>beneficio colateral de privacidad</strong>: los diagnósticos específicos son información sensible; agruparlos reduce el riesgo de re-identificación.</p>
+                </div>
+
+                <h3>5.2. Variables Creadas (Feature Engineering)</h3>
+
+                <h4><code>prior_visits</code></h4>
+                <p>Variable sintética que resume la historia de utilización hospitalaria:</p>
+                <p><code>prior_visits = number_outpatient + number_emergency + number_inpatient</code></p>
+                <ul>
+                    <li><strong>Media:</strong> 1.2 visitas</li>
+                    <li><strong>Mediana:</strong> 0 visitas (60% sin historial)</li>
+                    <li><strong>Máximo:</strong> 80 visitas (outlier extremo)</li>
+                </ul>
+
+                <h4><code>any_med_change</code></h4>
+                <p>Variable binaria que indica si hubo modificación en la medicación durante el encuentro:</p>
+                <p><code>any_med_change = 1 si change == 'Ch', else 0</code></p>
+                <ul>
+                    <li><strong>Proporción:</strong> ~18% de los encuentros tuvieron cambio de medicación</li>
+                </ul>
+
+                <div class="callout callout-success">
+                    <h4>✅ Dataset Final</h4>
+                    <p>Tras todas las transformaciones, el dataset limpio contiene:</p>
+                    <ul>
+                        <li><strong>99.340 registros</strong> (encuentros hospitalarios válidos)</li>
+                        <li><strong>39 variables</strong> (demográficas, clínicas, medicamentos, target)</li>
+                        <li><strong>0 valores nulos</strong></li>
+                        <li>Guardado como <code>diabetic_data_clean.csv</code></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 6: CONCLUSIONES -->
+            <section id="conclusions">
+                <h2>6. Conclusiones e Implicaciones para el Modelado</h2>
+
+                <h3>6.1. Resumen de Hallazgos</h3>
+                <ol>
+                    <li><strong>Calidad de Datos:</strong> El dataset original requería limpieza significativa, particularmente en variables con nulos extremos (>80%) y registros de pacientes fallecidos que sesgaban el target.</li>
+                    <li><strong>Desequilibrio de Clases:</strong> El 11.1% de readmisiones justifica el uso de modelos generativos condicionales para balancear clases durante la síntesis.</li>
+                    <li><strong>Cardinalidad Reducida:</strong> La agrupación ICD-9 de diagnósticos mejora la viabilidad del modelado y reduce riesgos de privacidad.</li>
+                    <li><strong>Correlaciones Preservadas:</strong> Las relaciones entre variables de utilización deben ser capturadas fielmente por los modelos generativos.</li>
+                </ol>
+
+                <h3>6.2. Recomendaciones para la Fase 3 (Modelado Generativo)</h3>
+
+                <div class="callout callout-info">
+                    <h4>🤖 Selección de Modelos</h4>
+                    <ul>
+                        <li><strong>CTGAN:</strong> Recomendado para manejar el desequilibrio de clases mediante muestreo condicional en la variable <code>readmitted</code>.</li>
+                        <li><strong>TVAE:</strong> Útil para generación rápida de grandes volúmenes de datos sintéticos; puede "suavizar" distribuciones multimodales.</li>
+                        <li><strong>TabDDPM:</strong> Estado del arte para capturar correlaciones complejas; recomendado para validación final de fidelidad estadística.</li>
+                    </ul>
+                </div>
+
+                <h3>6.3. Consideraciones de Privacidad y GDPR</h3>
+
+                <div class="callout callout-warning">
+                    <h4>🔒 Riesgos Identificados</h4>
+                    <ul>
+                        <li><strong>Re-identificación:</strong> Combinaciones únicas de variables (ej. edad + diagnóstico + especialidad médica) podrían permitir vinculación con registros externos.</li>
+                        <li><strong>Inferencia:</strong> Las correlaciones fuertes permiten deducir valores no observados.</li>
+                        <li><strong>Membresía:</strong> Un atacante podría determinar si un individuo específico estaba en el dataset de entrenamiento.</li>
+                    </ul>
+                </div>
+
+                <div class="callout callout-success">
+                    <h4>🛡️ Próximas Validaciones (Fase 5)</h4>
+                    <ul>
+                        <li><strong>Distance to Closest Record (DCR):</strong> Demostrar que los datos sintéticos no son copias exactas de registros reales.</li>
+                        <li><strong>Membership Inference Attack (MIA):</strong> Simular ataques para verificar que el modelo no memorizó individuos específicos.</li>
+                        <li><strong>Validación TSTR:</strong> Entrenar modelos predictivos con datos sintéticos y testear con reales para cuantificar utilidad.</li>
+                    </ul>
+                </div>
+
+                <h3>6.4. Conclusión Final</h3>
+                <p>El EDA ha establecido una base sólida para la generación de datos sintéticos. Las transformaciones aplicadas (exclusión de fallecidos, agrupación ICD-9, imputación de nulos, ingeniería de variables) han producido un dataset limpio y estructurado que mantiene las propiedades estadísticas esenciales mientras reduce riesgos de privacidad.</p>
+
+                <p><strong>El siguiente paso</strong> es implementar los modelos generativos (CTGAN, TVAE, TabDDPM) y evaluar su capacidad para producir datos que:</p>
+                <ol>
+                    <li>Sean estadísticamente indistinguibles de los reales (fidelidad)</li>
+                    <li>Preserven la utilidad predictiva (TSTR validation)</li>
+                    <li>Resistan ataques de re-identificación e inferencia (privacidad)</li>
+                    <li>Crucen el umbral legal de "datos anónimos" bajo GDPR</li>
+                </ol>
+            </section>
+        </main>
+
+        <footer>
+            <div class="container">
+                <p><strong>TFM: Generación de Datos Sintéticos para Sectores Sensibles</strong></p>
+                <p>Informe generado como parte del análisis exploratorio de datos</p>
+                <p>Dataset: Diabetes 130-US Hospitals for Years 1999-2008 | UCI Machine Learning Repository</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Smooth scrolling for TOC links
+        document.querySelectorAll('.toc a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Highlight current section in TOC
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            const tocLinks = document.querySelectorAll('.toc a');
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 150;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.style.background = link.getAttribute('href') === `#${current}`
+                    ? 'var(--primary)'
+                    : 'var(--bg-light)';
+                link.style.color = link.getAttribute('href') === `#${current}`
+                    ? 'white'
+                    : 'var(--primary)';
+            });
+        });
+    </script>
+</body>
+</html>
