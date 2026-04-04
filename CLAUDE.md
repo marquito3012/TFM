@@ -55,9 +55,35 @@ compartida/
 - **New Features**: `prior_visits`, `any_med_change`
 - **Target**: `readmitted` (<30, >30, NO) — 11.1% minority class
 
+## Phase 3 Scripts (Generative Engine)
+
+```
+compartida/scripts/
+├── config.py              # Centralized hyperparameters, paths, column metadata
+├── data_loader.py         # Loads clean CSV, casts types, returns SDV metadata
+├── check_environment.py   # Verifies GPU, libs, datasets before training
+├── train_ctgan.py         # CTGAN training + synthetic data generation
+├── train_tvae.py          # TVAE training + latent space diagnostics
+├── train_tabddpm.py       # TabDDPM from scratch (PyTorch): MLP denoiser + DDPM sampling
+└── run_all_models.py      # Orchestrator: runs all three models sequentially
+```
+
+**Execution order:**
+```bash
+python scripts/check_environment.py          # Verify setup
+python scripts/run_all_models.py --quick     # Fast test (50 epochs)
+python scripts/run_all_models.py             # Full training
+```
+
+**Outputs:**
+- `compartida/outputs/synthetic_ctgan.csv`
+- `compartida/outputs/synthetic_tvae.csv`
+- `compartida/outputs/synthetic_tabddpm.csv`
+- `compartida/models/` — saved model checkpoints
+
 ## Next Implementation Files
 
-- `compartida/notebooks/03_model_implementation.ipynb` — CTGAN/TVAE/TabDDPM
+- `compartida/notebooks/03_model_implementation.ipynb` — orchestrates the scripts above
 - `compartida/notebooks/04_evaluation.ipynb` — Fidelity metrics, TSTR validation
 - `compartida/notebooks/05_privacy_attacks.ipynb` — DCR, MIA tests
 
