@@ -5,10 +5,10 @@ services:
       dockerfile: Dockerfile
     container_name: tfm
     # Acceso a la GPU AMD (Comentado para Laptop/APU)
-    # devices:
-    #   - "/dev/kfd:/dev/kfd"
-    #   - "/dev/dri:/dev/dri"
-    shm_size: '2gb' # Reducido para laptop
+    devices:
+      - "/dev/kfd:/dev/kfd"
+      - "/dev/dri:/dev/dri"
+    # shm_size: '2gb' # Reducido para laptop
     # Mantenemos el contenedor abierto para interactuar
     tty: true
     stdin_open: true

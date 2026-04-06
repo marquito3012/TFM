@@ -1,5 +1,5 @@
-# FROM rocm/pytorch:latest (Usa esta para el PC de sobremesa con GPU AMD)
-FROM python:3.10-slim
+FROM rocm/pytorch:latest
+# FROM python:3.10-slim
 
 # 1. Configuración de zona horaria y sistema
 ENV TZ=Europe/Madrid

@@ -107,15 +107,24 @@ El proyecto está dockerizado para garantizar la reproducibilidad del entorno y 
 - [x] **Agrupación ICD-9:** Consolidación de diagnósticos en 9 categorías clínicas para optimizar el aprendizaje del motor generativo.
 - [x] **Ingeniería de Variables:** Creación de variables sintéticas como `prior_visits` y normalización visual del dataset.
 
-## 🟩 Fase 3: Implementación del Motor Generativo (Semanas 5-7)
-- [ ] **Desarrollo del Modelo:** Programar las diferentes arquitecturas seleccionadas (CTGAN, TVAE y Tabular Diffusion) en PyTorch.
-- [ ] **Entrenamiento:** Configurar el bucle de entrenamiento y funciones de pérdida.
-- [ ] **Optimización:** Ajuste de hiperparámetros para evitar *mode collapse* y *overfitting*.
-- [ ] **Espacio Latente:** Validar la transformación de datos brutos al espacio latente.
+## 🟩 Fase 3: Implementación del Motor Generativo (Semanas 5-7) ✅ COMPLETADA
+- [x] **Desarrollo del Modelo:** Programación de las arquitecturas (CTGAN, TVAE y Tabular Diffusion) en PyTorch.
+- [x] **Entrenamiento:** Configuración del bucle de entrenamiento y funciones de pérdida completado.
+- [x] **Optimización:** Ajuste de hiperparámetros para evitar *mode collapse* y *overfitting*.
+- [x] **Espacio Latente:** Validación de la transformación de datos brutos al espacio latente.
+- [x] **Modelos Entrenados y Guardados:**
+  - `compartida/models/ctgan_model.pkl` — Modelo CTGAN entrenado
+  - `compartida/models/tvae_model.pkl` — Modelo TVAE entrenado
+  - `compartida/models/tabddpm_model.pt` — Modelo TabDDPM entrenado (PyTorch)
+- [x] **Datos Sintéticos Generados:**
+  - `compartida/outputs/synthetic_ctgan.csv` — Datos sintéticos de CTGAN
+  - `compartida/outputs/synthetic_tvae.csv` — Datos sintéticos de TVAE
+  - `compartida/outputs/synthetic_tabddpm.csv` — Datos sintéticos de TabDDPM
+  - `compartida/outputs/tabddpm_loss_curve.csv` — Curva de pérdida de TabDDPM
 
 ## 🟧 Fase 4: Evaluación de Calidad y Utilidad (Semanas 8-9)
-- [ ] **Fidelidad Estadística:** Calcular distancias de Wasserstein y matrices de correlación (Pearson/Spearman).
-- [ ] **Validación TSTR:** Entrenar modelos de ML con datos sintéticos y testear con reales.
+- [ ] **Fidelidad Estadística:** Calcular distancias de Wasserstein y matrices de correlación (Pearson/Spearman) entre datos reales y sintéticos.
+- [ ] **Validación TSTR:** Entrenar modelos de ML con datos sintéticos y testear con reales para evaluar utilidad.
 - [ ] **Métricas de Éxito:** Verificar que la brecha de rendimiento (F1/AUC) sea inferior al 5%.
 
 ## 🟥 Fase 5: Protocolo de Privacidad y Ataques (Semana 10)
