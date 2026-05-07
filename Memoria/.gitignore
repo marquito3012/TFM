@@ -17,5 +17,5 @@
 *.vrb
 
 # Ignorar la carpeta build, pero permitir el PDF principal
-build/
+build/*
 !build/main.pdf
