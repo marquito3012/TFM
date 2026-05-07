@@ -16,4 +16,6 @@
 *.snm
 *.vrb
 
+# Ignorar la carpeta build, pero permitir el PDF principal
 build/
+!build/main.pdf
