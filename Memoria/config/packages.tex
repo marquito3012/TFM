@@ -1,0 +1,56 @@
+% =============================================================================
+% PACKAGES
+% =============================================================================
+
+% --- Encoding & Language ---
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+
+% --- Font: New Century Schoolbook ---
+\usepackage{newcent}
+
+% --- Core packages ---
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\usepackage{tikz}
+\usepackage{eso-pic}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{enumitem}
+\usepackage{etoolbox}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{url}
+\usepackage{csquotes}
+
+% --- Bibliography (APA format with biber backend) ---
+\usepackage[
+  backend=biber,
+  style=apa,
+  sortcites=true,
+  sorting=nyt
+]{biblatex}
+\addbibresource{bibliography.bib}
+\DeclareLanguageMapping{spanish}{spanish-apa}
+\setlength\bibitemsep{24pt}
+
+% --- UAX Brand Colors ---
+\definecolor{uaxblue}{HTML}{0060AB}       % Endeavour - main blue
+\definecolor{uaxdarkblue}{HTML}{003F70}   % Regal Blue - dark blue
+\definecolor{uaxborder}{HTML}{0060AB}     % Endeavour - border
+
+\usepackage[
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=uaxblue,
+  citecolor=uaxblue
+]{hyperref}
+
+% --- Graphics path ---
+\graphicspath{{images/}}
