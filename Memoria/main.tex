@@ -1,0 +1,58 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plantilla Trabajo Fin de Máster - Universidad Alfonso X el Sabio
+% (c) 2026, Kenny Berrones
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper,12pt]{report}
+
+% --- Page geometry ---
+\usepackage[
+  a4paper,
+  top=3.5cm,
+  bottom=3.5cm,
+  left=3.0cm,
+  right=2.86cm,
+  headheight=1.2cm,
+  headsep=0.8cm,
+  footskip=2.5cm
+]{geometry}
+
+% --- Config ---
+\input{config/packages}
+\input{config/metadata}
+\input{config/styles}
+\input{config/layout}
+
+% =============================================================================
+\begin{document}
+
+% --- Cover ---
+\input{chapters/cover}
+
+% --- Abstract ---
+\input{chapters/abstract}
+
+% --- Table of Contents ---
+\newpage
+\pagestyle{mainbody}
+
+{
+\hypersetup{hidelinks}
+\renewcommand{\contentsname}{{\fontsize{20pt}{24pt}\selectfont\color{uaxblue} ÍNDICE}}
+\tableofcontents
+}
+
+% --- Chapters ---
+\input{chapters/chapter1}
+\input{chapters/chapter2}
+\input{chapters/chapter3}
+\input{chapters/chapter4}
+\input{chapters/chapter5}
+\input{chapters/chapter6}
+
+% --- Bibliography ---
+\input{chapters/bibliography}
+
+% --- Appendix ---
+\input{chapters/appendix}
+
+\end{document}
