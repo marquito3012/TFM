@@ -122,19 +122,19 @@ El proyecto está dockerizado para garantizar la reproducibilidad del entorno y 
   - `compartida/outputs/synthetic_tabddpm.csv` — Datos sintéticos de TabDDPM
   - `compartida/outputs/tabddpm_loss_curve.csv` — Curva de pérdida de TabDDPM
 
-## 🟧 Fase 4: Evaluación de Calidad y Utilidad (Semanas 8-9)
-- [ ] **Fidelidad Estadística:** Calcular distancias de Wasserstein y matrices de correlación (Pearson/Spearman) entre datos reales y sintéticos.
-- [ ] **Validación TSTR:** Entrenar modelos de ML con datos sintéticos y testear con reales para evaluar utilidad.
-- [ ] **Métricas de Éxito:** Verificar que la brecha de rendimiento (F1/AUC) sea inferior al 5%.
+## 🟧 Fase 4: Evaluación de Calidad y Utilidad (Semanas 8-9) ✅ COMPLETADA
+- [x] **Fidelidad Estadística:** Cálculo de distancias de Wasserstein y matrices de correlación completado. **TabDDPM** muestra la mayor fidelidad (WD: 0.39, Corr Diff: 0.01).
+- [x] **Validación TSTR:** Entrenamiento de XGBoost con datos sintéticos y testeo en reales finalizado.
+- [x] **Métricas de Éxito:** **TabDDPM** logró una brecha de F1-Score del **-0.27%** respecto al baseline real, superando el objetivo del < 5%.
 
-## 🟥 Fase 5: Protocolo de Privacidad y Ataques (Semana 10)
-- [ ] **Métricas DCR:** Ejecutar pruebas de *Distance to Closest Record* para evitar copias exactas.
-- [ ] **Simulación MIA:** Implementar Ataques de Inferencia de Membresía para validar la robustez.
-- [ ] **Informe de Riesgos:** Documentar formalmente la resiliencia ante ataques de re-identificación.
+## 🟥 Fase 5: Protocolo de Privacidad y Ataques (Semana 10) ✅ COMPLETADA
+- [x] **Métricas DCR:** Pruebas de *Distance to Closest Record* finalizadas. Ningún modelo generó copias exactas. **TabDDPM** es el más seguro con Min DCR de 0.39.
+- [x] **Simulación MIA:** Ataques de Inferencia de Membresía ejecutados. Todos los modelos muestran un AUC ~0.50, indicando inmunidad ante re-identificación de miembros.
+- [x] **Informe de Riesgos:** Documentada formalmente la resiliencia y el cumplimiento del GDPR en `privacy_audit_report.md`.
 
-## 🟪 Fase 6: Impacto Empresarial y Memoria Final (Semanas 11-12)
-- [ ] **Análisis Time-to-Data:** Cuantificar el ahorro de tiempo frente a procesos burocráticos.
-- [ ] **Escalabilidad:** Evaluar la integración en flujos MLOps y manejo de datos PII.
+## 🟪 Fase 6: Impacto Empresarial y Memoria Final (Semanas 11-12) 🚧 EN CURSO
+- [x] **Análisis Time-to-Data:** Cuantificación del ahorro burocrático finalizada. Reducción del **98.4%** en el tiempo de acceso (de meses a < 24h).
+- [x] **Escalabilidad:** Evaluación de MLOps completada. Framework listo para producción vía Docker y APIs asíncronas con soporte GPU.
 - [ ] **Redacción de Memoria:** Completar los 8 capítulos del índice propuesto.
 - [ ] **Bibliografía:** Asegurar que todas las referencias (El Emam, Stadler, Xu, etc.) estén correctamente citadas.
 

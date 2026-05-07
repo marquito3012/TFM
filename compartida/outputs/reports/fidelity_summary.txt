@@ -1,0 +1,13 @@
+RESUMEN DE FIDELIDAD ESTADISTICA
+================================
+
+Distancia de Wasserstein Media:
+     Model  Wasserstein
+0    CTGAN     0.761911
+1     TVAE     0.601726
+2  TabDDPM     0.396643
+
+Diferencia Media de Correlacion:
+CTGAN: 0.0675
+TVAE: 0.0395
+TabDDPM: 0.0122
