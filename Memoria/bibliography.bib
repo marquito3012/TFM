@@ -1,25 +1,231 @@
 % =============================================================================
 % BIBLIOGRAFÍA — Fichero BibTeX
-% Añade tus referencias aquí en formato BibTeX.
+% Sistema: biblatex + biber, estilo APA 7
+%
+% Citar en el texto:
+%   \parencite{clave}        → (Autor, año)
+%   \textcite{clave}         → Autor (año)
+%   \parencite[p.~X]{clave}  → (Autor, año, p. X)
 % =============================================================================
 
-@article{sanchez2018demographic,
-  author    = {Sánchez-Cabrero, Roberto and Barrientos-Fernández, Amelia and Arigita-García, Ana and Mañoso-Pacheco, Laura and Costa-Román, Óscar},
-  title     = {Demographic data, habits of use and personal impression of the first generation of users of virtual reality viewers in {Spain}},
-  journal   = {Data in Brief},
-  volume    = {21},
-  pages     = {2651--2657},
-  year      = {2018},
-  doi       = {10.1016/j.dib.2018.11.127},
+
+% -----------------------------------------------------------------------------
+% MODELOS GENERATIVOS PARA DATOS TABULARES
+% -----------------------------------------------------------------------------
+
+@inproceedings{xu2019ctgan,
+  author    = {Xu, Lei and Skoularidou, Maria and Cuesta-Infante, Alfredo and Veeramachaneni, Kalyan},
+  title     = {Modeling Tabular Data using Conditional {GAN}},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {32},
+  year      = {2019},
+  publisher = {Curran Associates, Inc.},
+  url       = {https://arxiv.org/abs/1907.00503},
 }
 
-@article{sanchez2018madurez,
-  author    = {Sánchez-Cabrero, Roberto and Barrientos-Fernández, Amelia and Arigita-García, Ana},
-  title     = {La madurez ante el espejo: Interrelación entre la satisfacción corporal y vital de personas mayores en {España}},
-  journal   = {European Journal of Health Research},
-  volume    = {4},
-  number    = {2},
-  pages     = {67--77},
-  year      = {2018},
-  doi       = {10.30552/ejhr.v4i2.105},
+@inproceedings{kotelnikov2023tabddpm,
+  author    = {Kotelnikov, Akim and Baranchuk, Dmitry and Rubachev, Ivan and Babenko, Artem},
+  title     = {{TabDDPM}: Modelling Tabular Data with Diffusion Models},
+  booktitle = {Proceedings of the 40th International Conference on Machine Learning},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {202},
+  pages     = {17564--17579},
+  year      = {2023},
+  publisher = {PMLR},
+  url       = {https://arxiv.org/abs/2209.15421},
+}
+
+@inproceedings{ho2020ddpm,
+  author    = {Ho, Jonathan and Jain, Ajay and Abbeel, Pieter},
+  title     = {Denoising Diffusion Probabilistic Models},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {33},
+  pages     = {6840--6851},
+  year      = {2020},
+  publisher = {Curran Associates, Inc.},
+  url       = {https://arxiv.org/abs/2006.11239},
+}
+
+@inproceedings{nichol2021improved,
+  author    = {Nichol, Alexander Quinn and Dhariwal, Prafulla},
+  title     = {Improved Denoising Diffusion Probabilistic Models},
+  booktitle = {Proceedings of the 38th International Conference on Machine Learning},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {139},
+  pages     = {8162--8171},
+  year      = {2021},
+  publisher = {PMLR},
+  url       = {https://arxiv.org/abs/2102.09672},
+}
+
+@inproceedings{goodfellow2014gan,
+  author    = {Goodfellow, Ian and Pouget-Abadie, Jean and Mirza, Mehdi and Xu, Bing and Warde-Farley, David and Ozair, Sherjil and Courville, Aaron and Bengio, Yoshua},
+  title     = {Generative Adversarial Nets},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {27},
+  year      = {2014},
+  publisher = {Curran Associates, Inc.},
+  url       = {https://arxiv.org/abs/1406.2661},
+}
+
+@article{kingma2014vae,
+  author  = {Kingma, Diederik P. and Welling, Max},
+  title   = {Auto-Encoding Variational {Bayes}},
+  journal = {arXiv preprint arXiv:1312.6114},
+  year    = {2014},
+  url     = {https://arxiv.org/abs/1312.6114},
+}
+
+@inproceedings{vaswani2017attention,
+  author    = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, {\L}ukasz and Polosukhin, Illia},
+  title     = {Attention Is All You Need},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {30},
+  year      = {2017},
+  publisher = {Curran Associates, Inc.},
+  url       = {https://arxiv.org/abs/1706.03762},
+}
+
+
+% -----------------------------------------------------------------------------
+% EVALUACIÓN DE DATOS SINTÉTICOS
+% -----------------------------------------------------------------------------
+
+@inproceedings{stadler2022synthetic,
+  author    = {Stadler, Theresa and Oprisanu, Bristena and Troncoso, Carmela},
+  title     = {Synthetic Data -- Anonymisation Groundhog Day},
+  booktitle = {31st USENIX Security Symposium (USENIX Security 22)},
+  pages     = {1451--1468},
+  year      = {2022},
+  publisher = {USENIX Association},
+  url       = {https://www.usenix.org/conference/usenixsecurity22/presentation/stadler},
+}
+
+@inproceedings{zhao2021ctabgan,
+  author    = {Zhao, Zilong and Kunar, Aditya and Birke, Robert and Chen, Lydia Y.},
+  title     = {{CTAB-GAN}: Effective Table Data Synthesizing},
+  booktitle = {Proceedings of the 13th Asian Conference on Machine Learning},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {157},
+  pages     = {97--112},
+  year      = {2021},
+  publisher = {PMLR},
+  url       = {https://arxiv.org/abs/2102.08369},
+}
+
+
+% -----------------------------------------------------------------------------
+% PRIVACIDAD, GDPR Y ANONIMIZACIÓN
+% -----------------------------------------------------------------------------
+
+@book{elemam2020synthetic,
+  author    = {El Emam, Khaled and Mosquera, Lucy and Jonker, Elizabeth},
+  title     = {Practical Synthetic Data Generation: Balancing Privacy and the Broad Availability of Data},
+  year      = {2020},
+  publisher = {O'Reilly Media},
+  address   = {Sebastopol, CA},
+  isbn      = {9781492072690},
+}
+
+@techreport{article29wp2014,
+  author      = {{Article 29 Data Protection Working Party}},
+  title       = {Opinion 05/2014 on Anonymisation Techniques},
+  institution = {European Commission},
+  number      = {0829/14/EN -- WP 216},
+  year        = {2014},
+  url         = {https://ec.europa.eu/justice/article-29/documentation/opinion-recommendation/files/2014/wp216_en.pdf},
+}
+
+@misc{gdpr2016,
+  author  = {{Parlamento Europeo and Consejo de la Uni{\'o}n Europea}},
+  title   = {Reglamento ({UE}) 2016/679 del Parlamento Europeo y del Consejo, de 27 de abril de 2016, relativo a la protecci{\'o}n de las personas f{\'i}sicas en lo que respecta al tratamiento de datos personales y a la libre circulaci{\'o}n de estos datos},
+  year    = {2016},
+  note    = {Diario Oficial de la Uni{\'o}n Europea, L 119, pp.\ 1--88},
+  url     = {https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX:32016R0679},
+}
+
+@inproceedings{dwork2006dp,
+  author    = {Dwork, Cynthia},
+  title     = {Differential Privacy},
+  booktitle = {Automata, Languages and Programming: 33rd International Colloquium, {ICALP} 2006},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {4052},
+  pages     = {1--12},
+  year      = {2006},
+  publisher = {Springer},
+  address   = {Berlin, Heidelberg},
+  doi       = {10.1007/11787006_1},
+}
+
+@inproceedings{shokri2017mia,
+  author    = {Shokri, Reza and Stronati, Marco and Song, Congzheng and Shmatikov, Vitaly},
+  title     = {Membership Inference Attacks Against Machine Learning Models},
+  booktitle = {2017 IEEE Symposium on Security and Privacy (SP)},
+  pages     = {3--18},
+  year      = {2017},
+  publisher = {IEEE},
+  doi       = {10.1109/SP.2017.41},
+}
+
+
+% -----------------------------------------------------------------------------
+% DATASET Y DOMINIO CLÍNICO
+% -----------------------------------------------------------------------------
+
+@article{strack2014diabetes,
+  author  = {Strack, Beata and DeShazo, Jonathan P. and Gennings, Chris and Olmo, Juan L. and Ventura, Sebastian and Cios, Krzysztof J. and Clore, John N.},
+  title   = {Impact of {HbA1c} Measurement on Hospital Readmission Rates: Analysis of 70,000 Clinical Database Patient Records},
+  journal = {BioMed Research International},
+  volume  = {2014},
+  pages   = {781670},
+  year    = {2014},
+  doi     = {10.1155/2014/781670},
+}
+
+
+% -----------------------------------------------------------------------------
+% EVALUACIÓN Y MÉTRICAS ML
+% -----------------------------------------------------------------------------
+
+@inproceedings{chen2016xgboost,
+  author    = {Chen, Tianqi and Guestrin, Carlos},
+  title     = {{XGBoost}: A Scalable Tree Boosting System},
+  booktitle = {Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
+  pages     = {785--794},
+  year      = {2016},
+  publisher = {ACM},
+  doi       = {10.1145/2939672.2939785},
+}
+
+@article{villani2008wasserstein,
+  author  = {Villani, C{\'e}dric},
+  title   = {Optimal Transport: Old and New},
+  journal = {Grundlehren der Mathematischen Wissenschaften},
+  volume  = {338},
+  year    = {2008},
+  publisher = {Springer},
+  address = {Berlin, Heidelberg},
+  doi     = {10.1007/978-3-540-71050-9},
+}
+
+
+% -----------------------------------------------------------------------------
+% INFRAESTRUCTURA Y REPRODUCIBILIDAD
+% -----------------------------------------------------------------------------
+
+@article{paszke2019pytorch,
+  author  = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and Desmaison, Alban and K{\"o}pf, Andreas and Yang, Edward and DeVito, Zachary and Raison, Martin and Tejani, Alykhan and Chilamkurthy, Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and Chintala, Soumith},
+  title   = {{PyTorch}: An Imperative Style, High-Performance Deep Learning Library},
+  journal = {Advances in Neural Information Processing Systems},
+  volume  = {32},
+  year    = {2019},
+  url     = {https://arxiv.org/abs/1912.01703},
+}
+
+@software{sdv2023,
+  author  = {{DataCebo, Inc.}},
+  title   = {{SDV}: Synthetic Data Vault},
+  year    = {2023},
+  version = {1.x},
+  url     = {https://sdv.dev},
 }
