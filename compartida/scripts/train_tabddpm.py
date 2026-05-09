@@ -62,6 +62,7 @@ def parse_args():
     p.add_argument("--T",           type=int,   default=TABDDPM_CONFIG["T"])
     p.add_argument("--n_samples",   type=int,   default=N_SYNTHETIC_SAMPLES)
     p.add_argument("--output",      type=str,   default=SYNTH_TABDDPM_PATH)
+    p.add_argument("--model_output",type=str,   default=os.path.join(MODELS_DIR, "tabddpm_model.pt"))
     p.add_argument("--no_cuda",     action="store_true")
     p.add_argument("--schedule",    type=str,   default=TABDDPM_CONFIG["schedule"],
                    choices=["linear", "cosine"])
@@ -457,8 +458,8 @@ def train(args) -> None:
     print(f"[Entrenamiento] Completado en {elapsed / 60:.1f} minutos.")
 
     # 8. Guardar modelo y preprocesador
-    os.makedirs(MODELS_DIR, exist_ok=True)
-    model_path = os.path.join(MODELS_DIR, "tabddpm_model.pt")
+    os.makedirs(os.path.dirname(args.model_output), exist_ok=True)
+    model_path = args.model_output
     torch.save({
         "model_state_dict": denoiser.state_dict(),
         "preprocessor":     preprocessor,

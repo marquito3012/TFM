@@ -3,6 +3,7 @@ pandas
 numpy
 scipy
 scikit-learn
+xgboost
 
 # IA Generativa y SDV (Específicos de tu TFM)
 sdv
