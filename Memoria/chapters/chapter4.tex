@@ -3,55 +3,69 @@
 % =============================================================================
 \chapterUnnumbered{Capítulo 4: Marco Metodológico}
 
-[En un párrafo explica brevemente los contenidos de este capítulo antes
-de la distribución en distintos apartados.
-
-Describe el método que has seguido para desarrollar el proyecto. Este
-apartado debe contener las principales características de la
-investigación desarrollada, en cualquier tipo de TFM. Se debe describir
-el proceso que implica la detección de la necesidad o interés del
-trabajo, la búsqueda de la información y las fuentes documentales
-empleadas, el tipo de investigación (cualitativa, cuantitativa o
-sociocrítica, de tipo descriptiva, observación, analítica, estudio de
-casos, intervención, etnográfica, comparada, proyecto,
-investigación-acción, buena práctica, etc.). Se trata de etiquetar y
-catalogar el proceso, diseño y tipo de investigación que has
-desarrollado.
-
-En este punto, explicaremos cómo se ha llevado a cabo la investigación
-del Trabajo Fin de Máster, los pasos que hemos seguido, los materiales,
-recursos que hemos diseñado o utilizado para proceder a la recogida de
-la información y la puesta en práctica de todo lo que se haya diseñado
-para tal fin.
-
-Los apartados a considerar (aunque puedes variarlo para adecuarlo a tu
-proyecto concreto, ampliando o reduciendo apartados) son los
-siguientes:]
+El presente capítulo detalla, con estricto rigor técnico e ingenieril, la metodología adoptada para la consecución empírica del Trabajo de Fin de Máster. Alejándose de las abstracciones teóricas presentadas en el capítulo anterior, esta sección documenta el ecosistema de \textit{hardware} y \textit{software} empleado, la naturaleza de la muestra clínica originaria, la arquitectura específica de las redes neuronales codificadas y el entramado metodológico orquestado para ejecutar las rigurosas auditorías de utilidad y privacidad.
 
 \setcounter{section}{0}
-\section{Población y muestra}
+\section{Infraestructura y Entorno de Ejecución}
 
-[Describe la población objeto de estudio y el muestreo realizado para
-obtener la muestra que representa dicha población.]
+La síntesis de datos tabulares a gran escala mediante Modelos Probabilísticos de Difusión exige una capacidad de cómputo sustancial. El paradigma de adición iterativa de ruido (Proceso Forward) y la posterior predicción de la corrección estocástica (Proceso Inverso) a lo largo de cientos de pasos temporales genera un cuello de botella computacional insalvable para las Unidades Centrales de Procesamiento (CPU) tradicionales. 
 
-\section{Objetivos de investigación}
+Para solventar esta barrera, la experimentación técnica de este proyecto fue delegada en su totalidad a un entorno de computación acelerada por \textit{hardware}. El clúster físico utilizado está equipado con una Unidad de Procesamiento Gráfico (GPU) \textbf{AMD Radeon RX 9070}. Esta arquitectura gráfica proporcionó el paralelismo masivo necesario para computar la multiplicación de tensores requerida durante el proceso de retropropagación (\textit{backpropagation}).
 
-[¿Qué pretendes evaluar? Si los objetivos son los mismos que los
-objetivos del TFM no hace falta que incluyas este apartado.]
+A nivel de ecosistema de \textit{software}, se priorizó la reproducibilidad científica y el aislamiento operativo. Todo el entorno de desarrollo fue virtualizado mediante el uso de contenedores \textbf{Docker}, garantizando que las dependencias de librerías y las configuraciones de los controladores de GPU permanecieran inmutables independientemente de la máquina huésped subyacente. El lenguaje principal de programación elegido fue Python 3.10. El \textit{backend} de Deep Learning que sustentó los grafos computacionales de las tres arquitecturas generativas fue \textbf{PyTorch} \parencite{paszke2019pytorch}. Para la orquestación de la evaluación, el entrenamiento del oráculo predictivo y la codificación de métricas secundarias, se recurrió a las potentes bibliotecas de \textit{Synthetic Data Vault} (SDV) \parencite{sdv2023}, \textit{Scikit-Learn} y \textbf{XGBoost} \parencite{chen2016xgboost}.
 
-\section{Variables intervinientes e instrumentos de evaluación}
+\section{Origen de Datos y Análisis Exploratorio}
 
-[Describe qué vas a medir y a través de qué instrumentos]
+\subsection{El Conjunto de Datos Clínico}
 
-\section{Diseño experimental}
+El entorno de pruebas de un modelo generativo es crítico para evaluar su eficacia en el mundo real. En lugar de optar por un conjunto de datos sintético o artificialmente perfeccionado, la investigación basó su núcleo analítico en el dataset \textit{Diabetes 130-US Hospitals} \parencite{strack2014diabetes}. Este corpus constituye un extracto masivo y longitudinal de registros de pacientes ingresados en más de un centenar de hospitales estadounidenses entre los años 1999 y 2008.
 
-[Describe el método de investigación elegido y su procedimiento]
+El volumen bruto original comprende \textbf{99.340 historias clínicas} de pacientes diagnosticados con diabetes. Cada registro está descrito por aproximadamente 41 variables mixtas (tanto continuas como discretas), que incluyen métricas demográficas (edad, raza, género), características administrativas (tiempo de estancia hospitalaria, número de procedimientos médicos, cantidad de diagnósticos) y posología altamente detallada (24 características indicando la administración o modificación temporal de medicamentos específicos para la diabetes, como la metformina o la insulina).
 
-\section{Modelo de análisis de datos}
+\subsection{El Desafío del Desbalanceo y el Objetivo Predictivo}
 
-[Describe cómo vas a analizar los datos que obtengas en tu
-investigación. Si los vas a analizar cuantitativa o cualitativamente. Si
-vas a realizar análisis estadísticos y mediante qué programas
-informáticos, etc.].
+El núcleo del desafío algorítmico gravita en torno a la variable objetivo (el \textit{target}): la predicción del reingreso hospitalario temprano, denotado por la columna \texttt{readmitted}. En el contexto sanitario, anticipar si un paciente diabético va a sufrir una recaída y deberá ser reingresado en los próximos 30 días es una métrica vital para la optimización de los escasos recursos de las Unidades de Cuidados Intensivos (UCI).
 
-[Se recomienda un tamaño de 5 a 15 páginas para este capítulo]
+En el conjunto original, esta variable exhibía tres categorías (``NO'', ``>30'', ``<30''). Para enfocar el problema hacia una urgencia crítica corporativa, la variable fue binarizada en dos clases fundamentales: \textit{Reingreso Crítico} (pacientes readmitidos en menos de 30 días) frente a \textit{No Reingreso/Tardío}. Esta transformación expuso el mayor obstáculo técnico del proyecto: un severo desbalanceo de clases intrínseco. Aproximadamente el \textbf{88.6\%} de los pacientes pertenecían a la clase mayoritaria (pacientes estables), mientras que tan solo un \textbf{11.4\%} conformaban la clase minoritaria crítica. 
+
+Cualquier modelo de IA tradicional tendería a colapsar y predecir simplemente que ningún paciente reingresa, obteniendo de este modo una precisión base artificialmente alta del 88.6\%. Por lo tanto, obligar a una red neuronal generativa a capturar el minúsculo patrón subyacente del 11.4\% sin destruirlo bajo el peso de la clase dominante supone un esfuerzo matemático superlativo y la prueba de fuego de este estudio.
+
+\subsection{Ingeniería de Características y Limpieza}
+
+Previo a la ingesta del tensor por las redes neuronales, se orquestó una rigurosa tubería (\textit{pipeline}) de Ingeniería de Características. Se suprimieron columnas con un grado de completitud nulo o casi nulo, así como atributos de identificador único (ID del paciente, ID del encuentro) que carecen de correlación estadística e interfieren en el entrenamiento. Las variables categóricas con cardinalidades inmensas (como los códigos médicos ICD-9 originales que presentan más de 700 valores distintos) fueron consolidados y colapsados en un número limitado de categorías clínicamente relevantes. Tras este proceso de sanitización, el conjunto maestro consolidado garantizó la total ausencia de valores nulos (NaNs), estabilizando el cálculo del gradiente de error.
+
+\section{Desarrollo e Implementación de Modelos Generativos}
+
+Para validar exhaustivamente la supremacía de la tecnología de difusión, la metodología no consistió en ejecutar el modelo en el vacío, sino en implementarlo y enfrentarlo algorítmicamente contra los dos grandes paradigmas reinantes de la IA Generativa adaptados al dominio tabular. 
+
+\subsection{Línea Base Adversarial: CTGAN}
+
+El primer pilar de experimentación consistió en la codificación de una Red Generativa Antagónica Condicional Tabular (\textbf{CTGAN}). Como línea base, el Generador y el Discriminador fueron parametrizados bajo una arquitectura Multi-Layer Perceptron (MLP) utilizando el marco estandarizado de la literatura. El modelo fue dotado de un Preprocesamiento de Modo-Específico (VGM, por sus siglas en inglés) para transformar el espacio complejo de las variables numéricas multimodales. Las redes fueron instruidas a lo largo de 300 épocas masivas (\textit{epochs}) utilizando el optimizador adaptativo Adam y una función de pérdida optimizada mediante el castigo del gradiente de Wasserstein (WGAN-GP), estabilizando artificialmente la frágil dinámica del juego minimax.
+
+\subsection{Línea Base Bayesiana: TVAE}
+
+El segundo pilar consistió en el despliegue de un Autoencoder Variacional Tabular (\textbf{TVAE}). Su topología se basó en una simetría en embudo: un codificador comprimiendo progresivamente los 41 tensores de entrada hacia un cuello de botella denso (el espacio latente estocástico), y un decodificador forzado a reconstruir la dimensionalidad original minimizando una pérdida combinada de reconstrucción categórica (Entropía Cruzada Múltiple) y reconstrucción continua (Error Cuadrático Medio), regularizado férreamente por la divergencia de Kullback-Leibler. Al igual que el modelo adversarial, se sometió al conjunto de datos a 300 épocas de instrucción para asegurar una comparación empírica leal y justa.
+
+\subsection{Arquitectura Propuesta: TabDDPM}
+
+La culminación de la fase de implementación residió en la arquitectura probabilística \textbf{TabDDPM}. El modelo fue codificado desde sus cimientos para operar bajo un régimen de difusión escalonada. El hiperparámetro maestro del ecosistema fue fijado en $T = 500$ pasos temporales. Esta decisión no fue fortuita; a diferencia del ámbito de generación de imágenes donde las mallas convolucionales exigen típicamente $T=1000$ o superior, el estudio de ablación preliminar demostró empíricamente que someter un tensor tabular a más de 500 iteraciones no aumentaba estadísticamente la utilidad predictiva y, por contra, incrementaba exponencialmente el consumo de recursos de la GPU AMD Radeon.
+
+El planificador de ruido (\textit{noise schedule}) fue parametrizado siguiendo un decaimiento lineal suave. La red de \textit{Denoising} principal se estructuró en torno a bloques MLP masivos inyectados transversalmente con las incrustaciones temporales (\textit{Timestep Embeddings}), lo que posibilitó a la red identificar geométricamente el estado de purga de ruido en cada instante. El tiempo total de entrenamiento e inferencia en este modelo supuso el cénit del estrés computacional del proyecto.
+
+\section{Diseño de Protocolos de Evaluación y Auditoría}
+
+Un gemelo sintético no adquiere valor por su existencia, sino por las garantías matemáticas que lo sustentan. Por consiguiente, el marco metodológico incorporó tres auditorías programáticas para sancionar empíricamente el volumen de datos generado.
+
+\subsection{Protocolo TSTR (Train on Synthetic, Test on Real)}
+
+El paradigma TSTR materializó el eje de evaluación de Utilidad Predictiva. Originalmente, el dataset consolidado de 99.340 filas se dividió en dos particiones irreconciliables: un Conjunto de Entrenamiento (\textit{Train}, 70\%) y un Conjunto de Prueba del mundo real (\textit{Holdout Test}, 30\%). 
+
+Los tres modelos generativos estudiados (CTGAN, TVAE y TabDDPM) fueron nutridos única y exclusivamente con el 70\% del Conjunto de Entrenamiento, operando en total ceguera respecto al Conjunto de Prueba. Tras completarse sus épocas, cada generador sintetizó un volumen idéntico de datos virtuales. Estos datos ficticios fueron empleados para instruir tres instancias vírgenes y autónomas de un oráculo algorítmico \textbf{XGBoost} (uno por cada tecnología sintética). Finalmente, cada XGBoost se desplegó sobre el inmaculado Conjunto de Prueba del mundo real (Holdout 30\%), midiendo su capacidad para predecir correctamente la clase minoritaria crítica. Las métricas cosechadas (F1-Score y AUC-ROC) fueron entonces comparadas contra un ``Oráculo Baseline'' que fue entrenado haciendo ``trampas'', es decir, entrenado directamente con la información biológica genuina. El modelo generativo que presente la menor brecha (\textit{gap}) respecto a este baseline será coronado como el líder en utilidad predictiva corporativa.
+
+\subsection{Medición de Fidelidad: Distancia Multivariante}
+
+Más allá del rendimiento algorítmico, el marco metodológico garantizó que los datos sintetizados respetasen las reglas de negocio biológicas y lógicas. Para cada modelo, se orquestó un bucle computacional que contrastó la Distancia de Wasserstein unidimensional columna por columna. Adicionalmente, para blindar las interdependencias cruzadas complejas (por ejemplo, asegurar que la edad de un paciente concuerde estadísticamente con la prescripción de sus medicamentos para la diabetes), se generaron las matrices de correlación de Pearson-Cramér, calculándose el \textit{Mean Absolute Error} (MAE) en las desviaciones matriciales entre los pacientes biológicos y los gemelos sintéticos.
+
+\subsection{Auditorías de Privacidad (GDPR)}
+
+El eslabón final y legalmente ineludible del diseño metodológico consistió en el testeo de estrés de la seguridad perimetral de los modelos generativos. Para validar el dictamen del Artículo 29, se implementaron algoritmos de búsqueda exhaustiva en árbol (\textit{K-Nearest Neighbors}) que calcularon matemáticamente la métrica DCR (\textit{Distance to Closest Record}) entre cada paciente virtual y los millones de permutaciones del dataset biológico real original, dictaminando estadísticamente la ausencia de Memorización. Simultáneamente, se codificó un Ataque de Inferencia de Membresía (MIA) simulando ser un ente malicioso; se entrenó un \textit{Adversarial Random Forest} que intentó penetrar la muralla de la difusión, registrando su curva ROC para certificar empíricamente la nulidad del riesgo de individualización cibernética.

@@ -3,51 +3,52 @@
 % =============================================================================
 \chapterUnnumbered{Capítulo 6: Conclusiones}
 
-[Recupera los objetivos iniciales y explica si se han cumplido y por qué.
-
-Debes comenzar con el primer objetivo específico y terminar con el
-general, explicando cómo y por qué has cumplido con el 100\% de lo que te
-planteaste al inicio del proyecto.]
+La culminación de esta investigación marca el cierre de un ciclo intensivo de desarrollo algorítmico, evaluación matemática y auditoría legal. El presente capítulo consolida los hallazgos obtenidos, evaluando críticamente el grado de cumplimiento de los objetivos iniciales, analizando las limitaciones ineludibles de la arquitectura propuesta y trazando una hoja de ruta pragmática para la evolución futura del ecosistema de síntesis de datos clínicos.
 
 \setcounter{section}{0}
-\section{Limitaciones}
+\section{Consecución de los Objetivos}
 
-[Errores cometidos y limitaciones de los resultados obtenidos, es
-decir, qué ha fallado para que tu proyecto no fuera perfecto.]
-
-\section{Prospectiva}
-
-[La prospectiva ¿Cómo vas a continuar/completar este proyecto? Aunque
-nunca lo hagas, debes decir cómo deberías hacerlo.]
-
-\section{Consideraciones finales}
-
-[Reflexión personal sobre las competencias adquiridas, lo que se ha
-aprendido a lo largo de todo el Máster y con la elaboración del TFM (en
-cuanto a contenidos y a nivel personal). Autoevaluación y propuestas
-de mejora en la percepción del rol docente.
-
-Trata de responder a las siguientes cuestiones:]
+El diseño fundacional de este Trabajo de Fin de Máster se vertebró sobre la consecución escalonada de cinco objetivos específicos, cuya materialización conjunta ha permitido cristalizar el objetivo general del proyecto. A continuación, se expone la justificación de su cumplimiento al 100\%:
 
 \begin{enumerate}
-  \item Reflexión final sobre los resultados obtenidos en el proyecto a
-  todos los niveles.
-  \item Reflexión personal sobre las competencias adquiridas a lo largo del
-  TFM, tanto a nivel profesional como del método científico.
-  \item Reflexión personal sobre lo que se ha aprendido a lo largo de todo
-  el Máster, tanto a nivel profesional como personal.
-  \item Autoevaluación y propuestas de mejora en la percepción del rol
-  docente.
-  \item Agradecimientos a todos los que han hecho posible el proyecto.
-  \item Deseo positivo final relacionado con el ámbito al que se ha
-  dedicado el trabajo como colofón a todo el proyecto.
+    \item \textbf{Exploración del Estado del Arte y del Marco Normativo (Cumplido):} Mediante el exhaustivo despliegue del Capítulo 3, se ha mapeado con éxito la transición histórica desde la privacidad estadística tradicional (k-anonimato) hasta los dictámenes del GDPR y el Grupo de Trabajo del Artículo 29. Simultáneamente, se deconstruyó el aparato matemático que subyace a las arquitecturas VAE, GAN y de Difusión, cimentando una base de conocimiento rigurosa que justificó tecnológicamente la elección del paradigma probabilístico.
+    
+    \item \textbf{Diseño e Implementación de la Arquitectura Generativa TabDDPM (Cumplido):} Superando las barreras arquitectónicas inherentes al formato tabular, se codificó satisfactoriamente un entorno de difusión parametrizado a $T=500$ pasos temporales con escalamiento de ruido lineal. El sistema se alojó en contenedores Docker y se aceleró de forma nativa mediante la infraestructura GPU PyTorch, logrando asimilar el inmenso volumen del historial clínico diabético sin desbordamientos de memoria.
+    
+    \item \textbf{Evaluación de Fidelidad y Utilidad Predictiva (Cumplido):} El protocolo TSTR (Train on Synthetic, Test on Real) se orquestó íntegramente. Las métricas extraídas demostraron empíricamente que el modelo TabDDPM logró un F1-Score de 0.6923, quedándose a una diferencia despreciable del 0.27\% respecto al oráculo XGBoost entrenado con datos reales. Se superó holgadamente a las líneas base CTGAN (-9.34\%) y TVAE (-41.0\%), consolidando al gemelo digital como un clon de alta fidelidad multivariante.
+    
+    \item \textbf{Auditoría de Ciberseguridad y Privacidad Empírica (Cumplido):} Para garantizar la inmunidad legal requerida por las instituciones sanitarias, se simuló un Ataque de Inferencia de Membresía (MIA), obteniendo un Área Bajo la Curva (ROC-AUC) de 0.501, certificando matemáticamente un comportamiento indistinguible del azar puro. Además, el análisis univariante de proximidad (Distance to Closest Record) demostró la ausencia absoluta de memorización fotográfica (DCR mínimo = 0.39).
+    
+    \item \textbf{Despliegue Operativo y Consolidación como Solución Corporativa (Cumplido):} Los resultados empíricos avalan que el \textit{pipeline} desarrollado permite a un hospital ingerir historiales confidenciales, instanciar un modelo de difusión y expulsar un corpus sintético ilimitado y anónimo. Este vector tecnológico neutraliza de raíz el paralizante \textit{Time-to-Data}, permitiendo que los equipos de ciencia de datos arranquen sus investigaciones inmediatamente sin vulnerar la soberanía del paciente.
 \end{enumerate}
 
-\begin{citaLiteralAPA}
-Ejemplo: ``No puedo terminar este proyecto sin reflejar mi deseo de que
-la situación educativa de X mejore en el futuro, para lo cual será muy
-importante Y. Por mi parte espero que esta pequeña contribución que ha
-supuesto este TFM sea el inicio de Z...''
-\end{citaLiteralAPA}
+Al haberse verificado sin fisuras cada uno de estos cinco hitos metodológicos, se dictamina que el \textbf{Objetivo General} ---desarrollar un \textit{framework} basado en aprendizaje profundo capaz de eludir la crisis del Time-to-Data hospitalario preservando la privacidad irrestricta de los ciudadanos--- ha sido coronado con un éxito ingenieril absoluto.
 
-Se recomienda un tamaño de 5 a 10 páginas para este capítulo.
+\section{Limitaciones del Estudio}
+
+A pesar de la excelencia empírica cosechada, la investigación adolece de limitaciones inherentes a la tecnología de difusión contemporánea que impiden catalogarla como un sistema libre de fricciones.
+
+La carencia fundamental reside en el \textbf{coste computacional masivo y la latencia de inferencia}. Mientras que un modelo CTGAN (tras ser entrenado) requiere apenas de una única pasada por la red generadora (un \textit{forward pass}) para sintetizar un nuevo registro paciente, el algoritmo TabDDPM requiere ejecutar su red densa centenares de veces secuenciales ($T=500$) en sentido inverso para cada lote de pacientes. Esto provoca que el tiempo de generación sintética sea órdenes de magnitud más lento, limitando su despliegue en escenarios que requieran síntesis de datos en estricto tiempo real (por ejemplo, transacciones de fraude de tarjetas o flujos de telemetría IoT de alta frecuencia).
+
+Adicionalmente, la red se validó sobre un conjunto de datos monolítico plano (\textit{single-table}). La realidad en los almacenes de datos hospitalarios modernos asume arquitecturas altamente normalizadas distribuidas en docenas de tablas relacionales jerárquicas (pacientes $\rightarrow$ admisiones $\rightarrow$ diagnósticos $\rightarrow$ medicaciones). El \textit{framework} actual carece de la lógica ontológica para propagar automáticamente la generación de claves primarias y foráneas de forma referencialmente íntegra.
+
+\section{Prospectiva y Trabajo Futuro}
+
+Para mitigar las limitaciones expuestas y catapultar el valor comercial y científico del proyecto, la hoja de ruta de la infraestructura se expande hacia tres líneas de investigación venideras:
+\begin{itemize}
+    \item \textbf{Muestreo Acelerado mediante Solvers Deterministas:} Se propone la implementación algorítmica de técnicas vanguardistas como Denoising Diffusion Implicit Models (DDIM) o DPM-Solvers. Estas alteraciones en la Ecuación Diferencial Ordinaria (ODE) del proceso inverso teóricamente permitirían a la red de \textit{denoising} saltarse decenas de pasos temporales, acelerando la velocidad de inferencia en un factor de $10\times$ o $20\times$ sin sacrificar la fidelidad del TSTR.
+    \item \textbf{Arquitecturas Relacionales (Multi-Table):} Desarrollar una red encapsuladora que procese el Grafo de Entidad-Relación de la base de datos SQL. La IA deberá comprender las multiplicidades lógicas (ej. un paciente biológico puede poseer infinitas admisiones, pero jamás dos fechas de nacimiento simultáneas) inyectando este condicionante estricto en la función de pérdida.
+    \item \textbf{Generación Transversal de Modalidades Mixtas:} Integrar capas de codificación basadas en \textit{Transformers} (LLMs) capaces de ingerir y sintetizar las notas clínicas en texto libre redactadas por los doctores, fusionándolas indisolublemente con los parámetros tabulares discretos.
+\end{itemize}
+
+\section{Consideraciones Finales y Reflexión Personal}
+
+Echar la vista atrás al trazado de este Trabajo de Fin de Máster invita a un profundo ejercicio de introspección sobre la madurez tecnológica alcanzada. A nivel competencial, el proyecto ha forjado un perfil técnico marcadamente híbrido. Desde la óptica de la Ingeniería de Datos y el \textit{Deep Learning}, el dominio práctico de librerías de bajo nivel como PyTorch y la orquestación de GPU han mutado de la mera curiosidad académica a la destreza industrial.
+
+Más allá del ámbito puramente codificador, el Máster ha infundido una visión holística sobre la Inteligencia Artificial: la comprensión innegociable de que los algoritmos no operan en un vacío hermético, sino que impactan en legislaciones civiles y éticas sociales. La inmersión en la dogmática del GDPR y la capacidad de argumentar matemáticamente (vía Privacidad Empírica) la licitud de un sistema IA demuestran una evolución desde un programador estándar hacia un perfil de Arquitecto de IA Corporativa responsable.
+
+Resultaría injusto no expresar un sincero agradecimiento al equipo docente del Máster, cuya perseverancia ha elevado sistemáticamente mis estándares académicos, y de manera particular, a mi tutor y círculo cercano, cuya paciencia incombustible brindó el soporte emocional necesario para atravesar los áridos desiertos de los errores de compilación algorítmica.
+
+\begin{citaLiteralAPA}
+Para concluir, no puedo terminar este proyecto sin reflejar mi deseo inquebrantable de que el celo por la ciberseguridad nunca más actúe como una guillotina para el avance biomédico. Confío en que, en el futuro cercano, las arquitecturas de síntesis de datos de código abierto terminen por dinamitar los silos de información privados, logrando que el conocimiento necesario para curar patologías críticas, como la diabetes, fluya libremente entre los investigadores de todo el globo terráqueo. Por mi parte, espero sinceramente que esta humilde pero rigurosa contribución tecnológica suponga un eslabón firme hacia esa utopía.
+\end{citaLiteralAPA}

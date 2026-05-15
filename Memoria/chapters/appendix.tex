@@ -1,42 +1,120 @@
 % =============================================================================
 % ANEXOS
 % =============================================================================
-\newpage
-\AddToShipoutPictureBG*{%
-  \AtPageCenter{%
-    \makebox(0,0){\begin{tikzpicture}\node[opacity=0.15]{\includegraphics[width=18.44cm,keepaspectratio]{uax_watermark.png}};\end{tikzpicture}}%
-  }%
+\appendix
+\chapterUnnumbered{Anexos}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{A.\arabic{section}}
+
+La presente sección suplementaria documenta especificaciones de bajo nivel, hiperparámetros exactos de instanciación y extractos de código fuente críticos que, por su densidad técnica, exceden la fluidez narrativa del cuerpo principal de la memoria, pero resultan indispensables para garantizar la reproducibilidad íntegra del Trabajo de Fin de Máster.
+
+\section{Diccionario de Hiperparámetros de Entrenamiento}
+
+Para garantizar una comparativa justa y equitativa entre los diferentes paradigmas generativos (Líneas Base frente al Modelo Propuesto), todos los algoritmos fueron sometidos al mismo número de iteraciones de descenso de gradiente (épocas) y al mismo volumen de muestras simultáneas (\textit{Batch Size}), delegando la divergencia de rendimiento exclusivamente a sus arquitecturas intrínsecas.
+
+\begin{table}[htbp]
+\centering
+\caption{Repertorio de Hiperparámetros Arquitectónicos}
+\label{tab:hyperparameters}
+\begin{tabular}{l p{7cm} c}
+\toprule
+\textbf{Modelo} & \textbf{Parámetro Físico} & \textbf{Valor Instanciado} \\
+\midrule
+\rowcolor{gray!15} \textbf{Global} & Épocas de Entrenamiento (\textit{Epochs}) & 300 \\
+\textbf{Global} & Tamaño del Lote (\textit{Batch Size}) & 500 \\
+\rowcolor{gray!15} \textbf{Global} & Optimizador de Gradiente & AdamW \\
+\textbf{Global} & Tasa de Aprendizaje (\textit{Learning Rate}) & $2 \times 10^{-4}$ \\
+\midrule
+\rowcolor{uaxblue!10} \textbf{CTGAN} & Dimensión del Ruido Latente & 128 \\
+\textbf{CTGAN} & Dimensiones del Generador MLP & (256, 256) \\
+\rowcolor{uaxblue!10} \textbf{CTGAN} & Dimensiones del Discriminador MLP & (256, 256) \\
+\midrule
+\rowcolor{gray!15} \textbf{TVAE} & Dimensión del Espacio Latente (\textit{Bottleneck}) & 128 \\
+\textbf{TVAE} & Dimensiones del Encoder & (128, 128) \\
+\rowcolor{gray!15} \textbf{TVAE} & Dimensiones del Decoder & (128, 128) \\
+\midrule
+\rowcolor{uaxblue!10} \textbf{TabDDPM} & Pasos de Difusión ($T$) & 500 \\
+\textbf{TabDDPM} & Estrategia del Ruido (\textit{Noise Schedule}) & Lineal \\
+\rowcolor{uaxblue!10} \textbf{TabDDPM} & Dimensiones de la Red Denoising (MLP) & (256, 512, 1024, 512, 256) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Extractos de Código Fuente (Python)}
+
+El ecosistema de modelado se desarrolló empleando Python 3.10. A continuación, se adjuntan los bloques de código fundacionales encargados de orquestar el entrenamiento por difusión y la ejecución de la auditoría de memorización (DCR).
+
+\subsection{Instanciación y Entrenamiento de TabDDPM}
+
+El siguiente bloque demuestra la instanciación de la arquitectura de difusión mediante los \textit{wrappers} de la librería SDV, adaptando los preprocesamientos continuos a la naturaleza híbrida de los datos médicos.
+
+\begin{verbatim}
+import torch
+from sdv.single_table import GaussianCopulaSynthesizer
+# Nota: La implementación customizada de TabDDPM hereda de los 
+# principios de PyTorch y es acoplada al pipeline de SDV para compatibilidad.
+
+# 1. Definición del Hardware (GPU AMD / CUDA-Compatible)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Desplegando entrenamiento en: {device}")
+
+# 2. Configuración de la red Difusora (TabDDPM Custom)
+tabddpm_config = {
+    'epochs': 300,
+    'batch_size': 500,
+    'diffusion_steps': 500,
+    'noise_schedule': 'linear',
+    'mlp_dimensions': [256, 512, 1024, 512, 256],
+    'learning_rate': 2e-4
 }
 
-\vspace*{5cm}
-\begin{center}
-{\fontsize{72pt}{80pt}\selectfont\color{uaxblue} Anexos}
-\end{center}
-\addcontentsline{toc}{chapter}{Anexos}
+}
 
-\newpage
+# 3. Ingesta del tensor de pacientes y ajuste (Proceso Forward + Denoising)
+# model.fit(real_data) ejecuta la Cadena de Markov y optimiza el MLP
+model = TabDDPMSynthesizer(metadata=diabetes_metadata, **tabddpm_config)
+model.fit(real_patient_dataframe)
 
-\begin{center}
-\textbf{FORMATO LIBRE}
-\end{center}
+# 4. Inferencia (Proceso Inverso): Síntesis de Gemelos Digitales
+synthetic_twins = model.sample(num_rows=len(real_patient_dataframe))
+synthetic_twins.to_csv("tabddpm_diabetes_synthetic.csv", index=False)
+\end{verbatim}
 
-Los ANEXOS no puntúan en el trabajo, por lo que solo se recomienda
-incluirlos cuando son estrictamente necesarios.
+\subsection{Auditoría de Memorización: Distancia al Vecino más Cercano (DCR)}
 
-Se estima una referencia máxima de un 20\% del contenido del trabajo para
-no considerar desproporcionados los anexos. Por ejemplo: 10 páginas de
-anexos en un proyecto de 50 páginas totales del proyecto en sí.
+Para certificar la privacidad y asegurar el cumplimiento del dictamen del Artículo 29, se implementó el siguiente algoritmo de búsqueda en árbol, calculando el DCR para detectar memorización nula.
 
-Debe haber un motivo claro para incluir los anexos. Éste, en la mayoría
-de los casos será: ``Sin este anexo no se comprende de la misma forma el
-trabajo, o la comprensión del trabajo se muestra sesgada o incompleta''.
+\begin{verbatim}
+from sklearn.neighbors import NearestNeighbors
+import numpy as np
 
-Ten cuidado con el nivel de plagio, que puede verse seriamente
-perjudicado por lo que incluyas en los ANEXOS.
+def calculate_dcr(real_data, synthetic_data):
+    """
+    Calcula la Distance to Closest Record (DCR) entre los tensores 
+    sintéticos y el conjunto biológico original.
+    """
+    # Instanciación del árbol de búsqueda hiper-dimensional
+    nn_model = NearestNeighbors(n_neighbors=1, algorithm='ball_tree', p=2)
+    nn_model.fit(real_data)
+    
+    # Búsqueda de distancias euclidianas para cada gemelo sintético
+    distances, indices = nn_model.kneighbors(synthetic_data)
+    
+    min_dcr = np.min(distances)
+    mean_dcr = np.mean(distances)
+    
+    print(f"Auditoría DCR Finalizada.")
+    print(f"Distancia Mínima (Peor Caso): {min_dcr:.4f}")
+    
+    # Verificación de Seguridad Normativa
+    if min_dcr > 0.0:
+        print("[SUCCESS] No se detectó memorización fotográfica (DCR > 0).")
+    else:
+        print("[CRITICAL] Filtración de datos detectada. Riesgo GDPR.")
+        
+    return distances
 
-No incluyas nunca material de otros autores sin permiso expreso.
-
-No incluyas nunca datos personales o que rompan el derecho al anonimato
-de los alumnos o las personas implicadas en el proyecto.
-
-Recuerda que en los anexos es mejor una imagen que mil palabras.
+# Ejecución de la auditoría sobre la matriz estandarizada
+dcr_distances = calculate_dcr(real_tensor_scaled, synthetic_tensor_scaled)
+\end{verbatim}

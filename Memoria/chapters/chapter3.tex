@@ -3,28 +3,107 @@
 % =============================================================================
 \chapterUnnumbered{Capítulo 3: Marco Teórico / Estado del Arte}
 
-[En un párrafo explica brevemente los contenidos de este capítulo antes
-de la distribución en distintos apartados.
+El desarrollo de soluciones basadas en Inteligencia Artificial (IA) para la síntesis de datos clínicos no puede entenderse como un esfuerzo puramente algorítmico; se trata de una convergencia multidisciplinar que entrelaza la criptografía, la estadística bayesiana, el aprendizaje profundo y el derecho tecnológico. En este capítulo se establece el marco teórico y se revisa el estado del arte de las tecnologías e investigaciones que fundamentan el presente Trabajo de Fin de Máster.
 
-En un marco teórico se debe describir la información científica
-relevante y para tu proyecto. Procura reflejar información actualizada y
-citarla adecuadamente (Normas APA 6ª edición que tienes en el Campus
-Virtual).
+El capítulo se ha estructurado en cuatro grandes bloques lógicos. En la primera sección se analiza el paradigma de la privacidad de datos, disecando el marco normativo europeo y los criterios legales que definen la anonimización. La segunda sección traza un recorrido evolutivo por las arquitecturas de Deep Learning generativo clásico, analizando rigurosamente las Redes Generativas Antagónicas (GANs) y los Autoencoders Variacionales (VAEs). La tercera sección aborda la vanguardia tecnológica: los Modelos Probabilísticos de Difusión (Diffusion Models) y su reciente adaptación al ecosistema de los datos tabulares. Finalmente, la cuarta sección consolida los protocolos formales de evaluación matemática requeridos para cuantificar la fidelidad, la utilidad y la seguridad de los gemelos digitales generados.
 
-Incluye, al menos, tantos apartados como áreas en las que esté
-implicadas tu proyecto.
+\setcounter{section}{0}
+\section{El Paradigma de la Privacidad de Datos en el Sector Clínico}
 
-Fuentes habituales donde obtener trabajos de referencia:]
+La proliferación de los sistemas de información hospitalarios ha generado vastos repositorios de datos masivos. Sin embargo, el historial clínico de un paciente no es meramente un conjunto de variables estadísticas; constituye una proyección digital íntima de su salud, genética y vulnerabilidades. La fuga, explotación o reidentificación indebida de estos datos puede originar consecuencias devastadoras, desde la discriminación en la concesión de seguros de salud y oportunidades laborales, hasta el fraude de identidad y la extorsión.
 
+\subsection{El Reglamento General de Protección de Datos (GDPR)}
+
+A nivel europeo, la protección de la información ciudadana está regida por el Reglamento (UE) 2016/679, universalmente conocido como el Reglamento General de Protección de Datos \parencite{gdpr2016}. El GDPR establece un marco punitivo y regulatorio sumamente estricto para el manejo de Información de Identificación Personal (PII, por sus siglas en inglés). En el contexto médico, los historiales clínicos son catalogados como ``categorías especiales de datos personales'' (Artículo 9 del GDPR), lo cual prohíbe explícitamente su tratamiento y distribución generalizada salvo en circunstancias de consentimiento explícito o interés público ineludible.
+
+Esta severidad regulatoria ha paralizado intrínsecamente la colaboración en el ecosistema científico. Las instituciones de investigación se topan con el denominado \textit{Time-to-Data}, un periodo burocrático de meses requerido para tramitar Acuerdos de Procesamiento de Datos, superar Comités Éticos y evaluar el Impacto en la Privacidad (DPIA). Para mitigar este cuello de botella, el propio GDPR proporciona una vía de escape: si los datos son rigurosamente "anónimos", dejan de estar bajo la jurisdicción del reglamento, permitiendo su libre procesamiento.
+
+\subsection{Anonimización y el Dictamen del Grupo de Trabajo del Artículo 29}
+
+El concepto de anonimización es frecuentemente malinterpretado en la industria tecnológica. Tradicionalmente, se ha creído que la supresión de identificadores directos (nombres, números de seguridad social) o la seudonimización mediante \textit{hashing} criptográfico bastaba para anonimizar una base de datos. La literatura de ciberseguridad ha refutado reiteradamente esta falacia, demostrando que atributos demográficos aparentemente inofensivos (como el código postal, el género y la fecha de nacimiento) son suficientes para reidentificar a un alto porcentaje de la población al cruzarlos con bases de datos externas.
+
+Para arrojar luz legal sobre este conflicto tecnológico, el Grupo de Trabajo del Artículo 29 (el órgano consultivo independiente de la Unión Europea sobre protección de datos) emitió el Dictamen 05/2014 sobre técnicas de anonimización \parencite{article29wp2014}. En este documento fundacional, se dictamina que, para considerar un conjunto de datos como legítimamente anónimo, el proceso de transformación debe ser irreversible y garantizar la mitigación de tres riesgos fundamentales:
 \begin{itemize}
-  \item \textit{Google académico}: \url{https://scholar.google.es/} como principal
-  herramienta de búsqueda, que enlaza todas las bases de datos.
-  \item \textit{ERIC}: \url{https://eric.ed.gov/}
-  \item \textit{Psycnet}: \url{http://psycnet.apa.org/}
-  \item \textit{Dialnet}: \url{https://dialnet.unirioja.es/}
-  \item \textit{Medline/Pubmed}: \url{https://www.nlm.nih.gov/bsd/pmresources.html}
-  \item Otros (cada ámbito científico suele tener sus propias bases de datos
-  a consultar).
+    \item \textbf{Individualización (Singling out):} La imposibilidad de aislar a un individuo u obtener un registro único a partir de la masa de datos.
+    \item \textbf{Vinculación (Linkability):} La incapacidad de relacionar dos o más registros relativos al mismo sujeto en bases de datos dispares.
+    \item \textbf{Inferencia (Inference):} La inviabilidad de deducir, con una probabilidad significativa, el valor de un atributo sensible de un individuo a partir de la información proporcionada.
 \end{itemize}
+Cualquier metodología de síntesis de datos clínicos debe, por tanto, someterse a auditorías que demuestren el cumplimiento de estos tres criterios para obtener la inmunidad legal que otorga el GDPR.
 
-[Se recomienda un tamaño de 10 a 20 páginas para este capítulo]
+\subsection{Privacidad Empírica vs. Privacidad Diferencial Formal}
+
+Para garantizar la mitigación de los riesgos de inferencia expuestos, la comunidad científica ha desarrollado dos vertientes fundamentales de protección: la Privacidad Diferencial Formal y la Privacidad Empírica.
+
+La Privacidad Diferencial (Differential Privacy o DP), propuesta por \textcite{dwork2006dp}, ofrece una garantía matemática inquebrantable. Un algoritmo se considera $\epsilon$-diferencialmente privado si la eliminación o adición de un único individuo en la base de datos de entrenamiento no altera la distribución de probabilidad de la salida del algoritmo más allá de un factor multiplicativo determinado por el presupuesto de privacidad $\epsilon$. Esta técnica se aplica inyectando ruido estadístico calibrado (mediante mecanismos de Laplace o Gaussianos) durante el entrenamiento de las redes generativas. Sin embargo, como apuntan \textcite{elemam2020synthetic}, forzar garantías teóricas rígidas en modelos de \textit{Deep Learning} genera una drástica degradación en la fidelidad y utilidad predictiva de los datos resultantes, arruinando su viabilidad corporativa.
+
+Como alternativa, ha surgido el paradigma de la Privacidad Empírica \parencite{stadler2022synthetic}. Bajo este enfoque, no se inyecta ruido matemático a ciegas, sino que se entrena el modelo de IA a su máxima capacidad de fidelidad y, a posteriori, se ejecuta una batería de ciberataques simulados contra el modelo y sus datos resultantes. Si los atacantes algorítmicos fracasan en reidentificar a los pacientes, el riesgo se considera ``no razonablemente probable'', cumpliendo \textit{de facto} con el considerando 26 del GDPR sin sacrificar la calidad estadística.
+
+\subsection{Modelos de Riesgo: Memorización e Inferencia de Membresía}
+
+Dentro de la validación de la Privacidad Empírica, los modelos generativos son auditados frente a dos vulnerabilidades críticas. En primer lugar, la \textbf{Memorización}, cuantificada habitualmente mediante la métrica \textit{Distance to Closest Record} (DCR). Dado que las redes neuronales masivas tienen millones de parámetros, existe el riesgo inherente de que el modelo sobreajuste (overfitting) y literalmente "memorice" pacientes del set de entrenamiento, escupiéndolos de forma idéntica durante la fase de generación sintética. Un análisis DCR mide la distancia euclidiana entre el clon sintético más cercano y el paciente real original, debiendo garantizar que la distancia sea estrictamente superior a cero en todo el corpus.
+
+En segundo lugar, se encuentra el \textbf{Ataque de Inferencia de Membresía (MIA)}. Formalizado matemáticamente por \textcite{shokri2017mia}, un MIA es un vector de ataque en el que un actor malicioso entrena un modelo clasificador binario en la sombra. El objetivo de este clasificador no es otro que predecir si un paciente específico en la vida real formó parte (membresía) del grupo de datos original con el que se entrenó la Inteligencia Artificial. Un modelo generativo robusto mitigará este ataque, forzando a la red del adversario a operar con una curva ROC-AUC cercana a 0.50, equivalente estadísticamente al lanzamiento de una moneda al azar.
+
+\section{Evolución del Modelado Generativo Profundo}
+
+La Inteligencia Artificial Generativa ha transitado por una evolución vertiginosa durante la última década. El objetivo fundamental de esta rama del Aprendizaje Automático no es discriminar o clasificar datos preexistentes, sino aprender la distribución de probabilidad subyacente $p_{data}(x)$ de un conjunto de datos reales, de modo que el modelo pueda generar nuevas muestras extraídas de una distribución aproximada $p_{model}(x)$.
+
+\subsection{Redes Generativas Antagónicas (GANs)}
+
+El punto de inflexión en la IA Generativa contemporánea aconteció en 2014 con la formulación de las Redes Generativas Antagónicas (GANs) por \textcite{goodfellow2014gan}. El marco de trabajo de las GANs se fundamenta en la Teoría de Juegos, proponiendo una arquitectura compuesta por dos redes neuronales que compiten en un juego minimax de suma cero: el Generador ($G$) y el Discriminador ($D$).
+
+El Generador ingiere ruido aleatorio $z$ procedente de un espacio latente estructurado (usualmente una distribución gaussiana normalizada) y lo transforma en un vector $G(z)$ con el objetivo de imitar los datos reales. Por su parte, el Discriminador actúa como un clasificador binario que recibe una mezcla de datos reales $x$ y datos falsificados $G(z)$, con el mandato de predecir la autenticidad de cada muestra. La función de pérdida (loss function) que rige este enfrentamiento adversarial se define algebraicamente como:
+$$ \min_G \max_D V(D, G) = \mathbf{E}_{x \sim p_{data}(x)}[\log D(x)] + \mathbf{E}_{z \sim p_z(z)}[\log (1 - D(G(z)))] $$
+
+A medida que el entrenamiento avanza, el Generador se ve forzado a producir falsificaciones cada vez más indetectables, obligando al Discriminador a refinar sus heurísticas de detección. En el límite teórico, el Generador domina la distribución real y el Discriminador es incapaz de decidir (D=0.5).
+
+En el ámbito de los datos tabulares, las GANs han sido adaptadas prolíficamente. Arquitecturas como CTGAN (\textit{Conditional Tabular GAN}) \parencite{xu2019ctgan} incorporaron generadores condicionales y preprocesamientos de Modo-Específico (VGM) para lidiar con variables categóricas, mientras que propuestas más recientes como CTAB-GAN \parencite{zhao2021ctabgan} añadieron redes convolucionales al flujo. No obstante, las GANs adolecen estructuralmente de dos defectos patológicos: la inestabilidad del entrenamiento (desvanecimiento del gradiente) y el temido "colapso de modo" (\textit{mode collapse}), un fenómeno por el cual el Generador descubre un único tipo de registro sintético engañoso y lo repite iterativamente, omitiendo la diversidad y las clases minoritarias del dataset real.
+
+\subsection{Autoencoders Variacionales (VAEs)}
+
+Cofundados por \textcite{kingma2014vae}, los Autoencoders Variacionales (VAEs) ofrecen una perspectiva probabilística divergente, priorizando la estabilidad del entrenamiento mediante el modelado bayesiano. A diferencia del enfrentamiento minimax, un VAE consta de una red Codificadora (\textit{Encoder}) que comprime un registro multidimensional $x$ hacia una distribución estocástica en un espacio latente de baja dimensión $q_\phi(z|x)$. Posteriormente, una red Decodificadora (\textit{Decoder}) extrae un punto de esa distribución y procede a reconstruir el dato original $p_\theta(x|z)$.
+
+El objetivo del entrenamiento en un VAE no es engañar a un discriminador, sino maximizar el Límite Inferior de Evidencia (\textit{Evidence Lower Bound} o ELBO). La función de pérdida se divide en dos componentes en perpetuo conflicto:
+$$ \mathcal{L}_{VAE} = -\mathbf{E}_{q_\phi(z|x)}[\log p_\theta(x|z)] + D_{KL}(q_\phi(z|x) || p(z)) $$
+El primer término actúa como una pérdida de reconstrucción clásica (fomentando copias precisas del paciente real), mientras que el segundo término es la Divergencia de Kullback-Leibler ($D_{KL}$), que actúa como un regularizador matemático forzando a las distribuciones latentes de los pacientes a asemejarse a una distribución normal estándar (una campana de Gauss perfecta).
+
+Esta tensión teórica (forzar a los datos reales a encajar en una única distribución continua regularizada) es, simultáneamente, la mayor virtud y el talón de Aquiles de los VAEs en el dominio tabular. Mientras que en imágenes (rostros, objetos) la transición entre píxeles es continua, en los datos tabulares clínicos existe un desbalanceo agudo y una frontera discreta severa entre los pacientes sanos (clase mayoritaria) y los enfermos críticos (clase minoritaria). Al comprimir ambas realidades en un espacio latente unificado fuertemente regularizado, las redes VAE tienden a difuminar las fronteras de decisión de las minorías, degradando sustancialmente su rendimiento predictivo en métricas como el F1-Score.
+
+\section{Modelos Probabilísticos de Difusión (Denoising Diffusion)}
+
+El panorama del aprendizaje profundo generativo sufrió un cisma fundacional en el año 2020 con la publicación seminal de \textcite{ho2020ddpm}, la cual introdujo de manera práctica y escalable los Modelos Probabilísticos de Difusión de Eliminación de Ruido (Denoising Diffusion Probabilistic Models o DDPM). Estos modelos abandonan completamente la tensión adversarial de las GANs y la compresión restrictiva de los VAEs. Su formulación se inspira directamente en la termodinámica fuera del equilibrio de la física teórica.
+
+\subsection{Fundamentos Matemáticos: Cadenas de Markov y Proceso Forward}
+
+La genialidad estructural de los modelos de difusión reside en dividir el complejo problema de "generar datos desde la nada" en cientos de diminutos y manejables pasos de corrección. El algoritmo define un Proceso Forward ($q$) o proceso de destrucción paramétrico de Markov. Dada una muestra real de la distribución original $x_0 \sim p_{data}(x)$, se le inyecta una cantidad ínfima y programada de ruido gaussiano en cada paso $t$, obteniendo secuencias latentes $x_1, x_2, ..., x_T$.
+$$ q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t} x_{t-1}, \beta_t \textbf{I}) $$
+Donde $\beta_t$ es la varianza programada del ruido (el \textit{schedule}). Si el número de pasos totales $T$ (típicamente 1000 pasos) es lo suficientemente grande, la distribución del tensor final $x_T$ se vuelve indistinguible de un ruido puramente aleatorio e isotrópico.
+
+\subsection{El Proceso Inverso y el Aprendizaje de Denoising}
+
+El corazón de la Inteligencia Artificial radica en aprender a ejecutar el Proceso Inverso ($p_\theta$). Si se es capaz de enseñar a una red neuronal profunda a descontaminar estadísticamente el tensor en el paso $x_t$ para predecir cómo era en el paso ligeramente anterior $x_{t-1}$, entonces la red puede tomar un ruido blanco completamente aleatorio ($x_T$) y reconstruir iterativamente una muestra realista ($x_0$).
+$$ p_\theta(x_{t-1} | x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t)) $$
+La red neuronal, referida como el \textit{Denoiser}, se entrena empleando el Error Cuadrático Medio clásico frente al ruido real inyectado. Como demostró \textcite{nichol2021improved}, el rendimiento óptimo se alcanza al optimizar el planificador del ruido (\textit{schedule} coseno), y parametrizar la red de manera que reciba el paso temporal $t$ como una integración de codificación posicional (Timestep Embedding), permitiendo que la red sepa exactamente en qué estadio de degradación se encuentra la muestra.
+
+\subsection{Adaptación al Dominio Tabular: El Framework TabDDPM}
+
+Históricamente, los DDPM se popularizaron de forma abrumadora en el procesamiento de imágenes, al ser respaldados internamente por arquitecturas U-Net. Sin embargo, en un hito científico reciente, \textcite{kotelnikov2023tabddpm} publicaron TabDDPM, el primer acercamiento serio para portar el poder probabilístico de la difusión a las complejas estructuras tabulares.
+
+Dado que la difusión es un proceso estocástico que opera asumiendo espacios euclidianos y ruido gaussiano continuo, el desafío radica en el tratamiento de variables enteras (edades) y categóricas (códigos diagnósticos, razas, géneros). TabDDPM soluciona esto mediante un preprocesamiento continuo masivo: los valores numéricos son estandarizados mediante varianzas unitarias, y las variables categóricas son transmutadas a vectores difusos mediante el uso de la codificación densa iterativa (\textit{One-Hot Encoding}). Esta vasta matriz de variables mixtas es procesada por una red \textit{Multi-Layer Perceptron} (MLP) masiva con conexiones residuales similares a las arquitecturas \textit{Attention} de \textcite{vaswani2017attention}, logrando preservar las interdependencias sin el colapso que sufren las redes convolucionales al carecer el texto tabular de vecindad espacial.
+
+\section{Protocolos de Evaluación en Datos Tabulares Sintéticos}
+
+Al carecer del componente perceptual del cual gozan las imágenes sintéticas (donde un humano puede evaluar si un rostro o paisaje es "realista" mediante inspección visual), la auditoría algorítmica de los gemelos tabulares exige una formalidad estadística inflexible dividida en dos ejes cardinales.
+
+\subsection{Fidelidad Estadística: La Distancia de Wasserstein}
+
+Para evaluar si la máquina ha aprendido fehacientemente las distribuciones del mundo real, se requiere medir la divergencia entre la distribución de densidad de los datos reales $p(x)$ y la distribución de los datos sintéticos $q(x)$. La métrica estándar de facto para variables continuas en el Deep Learning moderno es la Distancia de Wasserstein de Primer Orden ($W_1$), originada en los problemas matemáticos del transporte óptimo (Earth Mover's Distance) \parencite{villani2008wasserstein}.
+
+Conceptualmente, la distancia de Wasserstein calcula el "coste de trabajo" mínimo indispensable para reformar una distribución de probabilidad y transmutarla para que iguale a la otra. Cuanto menor sea el coste (acercándose asintóticamente a 0.0), más indistinguibles estadísticamente son la muestra generada y la realidad subyacente. Adicionalmente, el análisis de fidelidad debe ser robustecido a nivel multivariante, calculando la Diferencia de la Matriz de Correlación MAE (\textit{Mean Absolute Error}). Esta métrica resta iterativamente la matriz de correlación de Pearson o Cramér del dataset original a la matriz generada; una pérdida del orden del 1\% al 3\% es indicativo de un modelo altamente eficaz capaz de preservar las reglas de negocio lógicas inherentes.
+
+\subsection{Utilidad Predictiva: El Paradigma TSTR}
+
+El grado de madurez absoluto de un framework generativo no reside en su capacidad estadística descriptiva, sino en su rentabilidad algorítmica operativa. Para este fin, la validación se somete al riguroso protocolo formal denominado TSTR (\textit{Train on Synthetic, Test on Real}). 
+
+En el TSTR, la IA generativa despliega el volumen total de gemelos virtuales sin incluir un solo paciente biológico genuino. Este cuerpo sintético se emplea de forma hermética para entrenar un oráculo predictivo externo. Dada su contrastada resistencia al sobreajuste, la herramienta predictiva predilecta suele ser \textit{XGBoost} \parencite{chen2016xgboost}. 
+Posteriormente, este oráculo virgen se despliega para ejecutar su función predictiva sobre el grupo de datos reales de prueba (\textit{Holdout Test Set}) extraído al inicio del experimento y que jamás fue observado. El desempeño del oráculo entrenado por la inteligencia sintética se compara directamente contra el \textit{baseline} (un oráculo idéntico instruido con pacientes biológicos genuinos). Si el margen de pérdida predictiva, tasado en métricas de clasificación pesada como la curva ROC-AUC o el F1-Score armónico, es inferior al 1.0\% o 2.0\%, el ecosistema generativo se certifica como un repuesto integralmente compatible (\textit{Drop-In Replacement}) con garantías operativas óptimas en ambientes clínicos industriales.

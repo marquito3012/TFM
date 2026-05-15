@@ -3,74 +3,46 @@
 % =============================================================================
 \chapterUnnumbered{Capítulo 1: Introducción al Trabajo Fin de Máster}
 
-[Todo lo que veas entre corchetes son explicaciones a borrar de la
-versión final de tu TFM (Corchetes incluidos).
+La era de la digitalización ha transformado radicalmente todos los sectores de la sociedad moderna, pero pocos han experimentado un cambio tan profundo y con tanto potencial como el sector sociosanitario. La adopción masiva de los Historiales Médicos Electrónicos (EHR, por sus siglas en inglés) ha generado repositorios de información de un valor incalculable. Estos conjuntos de datos masivos encierran patrones ocultos que, mediante la aplicación de técnicas avanzadas de Inteligencia Artificial (IA) y Aprendizaje Automático (Machine Learning), pueden revolucionar la medicina preventiva, optimizar los diagnósticos, personalizar los tratamientos y, en última instancia, salvar vidas y reducir drásticamente los costes operativos de los sistemas de salud públicos y privados. Sin embargo, el aprovechamiento real de estos datos se enfrenta a un obstáculo formidable: la privacidad.
 
-El TFM se distribuye en Capítulos > Apartados > Subapartados. Si
-necesitas un cuarto nivel puedes añadir Subapartados de 2º nivel con el
-mismo formato que los subapartados de 1\textsuperscript{er} nivel.
-
-Redacta utilizando el estilo que corresponda de los 8 disponibles en la
-plantilla (en la pestaña INICIO arriba en el encabezado de Word tienes
-todos los estilos disponibles), así siempre seguirás respetando el
-formato oficial de la UAX.
-
-No utilices sangrías ni cambies el estilo de texto porque ya está
-adaptado al formato UAX. Cuando pongas títulos usa el estilo \textbf{Título
-Capítulo} (título de capítulo de primer nivel), \textbf{Título Apartado}
-(para los apartados en los que se subdivide el capítulo) y \textbf{Título
-Subapartado} (para los subapartados en los que se subdivide el
-apartado) según proceda, \textbf{Texto TFM} para el texto, \textbf{Bibliografía},
-para la bibliografía, y \textbf{Cita Literal APA} para las citas literales de
-más de 40 palabras. Las viñetas son \textbf{Viñetas TFM} y las \textbf{Viñetas
-numeradas TFM}. Si no sabes lo que es una viñeta fíjate en esto:]
-
-\begin{itemize}
-  \item Hola, yo soy una viñeta :)
-\end{itemize}
-
-\begin{enumerate}
-  \item Hola, yo soy una viñeta numerada XD
-\end{enumerate}
-
-CONSEJO GENERAL DE REDACCIÓN: Recuerda que la forma más adecuada de
-redactar es con estilo impersonal, es decir: Se ha realizado...; se
-parte de...; Se pretende desarrollar... En vez de: Realicé/realizamos...
-Partimos de... Pretendí/pretendimos realizar...
-
-Antes de comenzar a redactar el primer apartado del primer capítulo
-(CONSEJO GENERAL: Evita siempre poner 2 títulos seguidos sin estar
-separado por texto) en un primer párrafo describe de forma simple en qué
-consiste tu trabajo para que el lector sepa que se va a encontrar en el
-TFM. En un segundo párrafo explica brevemente los contenidos de este
-capítulo antes de continuar con los siguientes apartados (CONSEJO
-GENERAL: Cada vez que de un capítulo se deriven varios apartados o de
-que de un apartado se deriven varios subapartados conviene mostrar en el
-último párrafo antes de la derivación cuáles son dichas partes en las
-que se deriva el capítulo/apartado).
+En este capítulo introductorio se establecen las bases fundamentales que motivan la realización de este Trabajo de Fin de Máster. En primer lugar, se justificará la necesidad imperante de desarrollar nuevas tecnologías que permitan eludir la actual dicotomía entre la utilidad de los datos médicos y el derecho a la privacidad de los pacientes. Posteriormente, se presentará formalmente el proyecto, detallando el problema técnico que se aborda, la solución propuesta basada en Inteligencia Artificial Generativa y, finalmente, se desglosará la estructura de los contenidos que conforman la presente memoria académica.
 
 \setcounter{section}{0}
 \section{Justificación del proyecto realizado}
 
-[Primero justificaremos de manera personal por qué elegimos este
-proyecto (¿Cómo se te ocurrió la realización de este proyecto? ¿Por qué
-crees que lo vas a realizar bien?), y luego justificaremos la utilidad
-científica/educativa del proyecto (¿Por qué crees que será útil? ¿Por
-qué crees que es relevante realizarlo como TFM?).
+El siglo XXI ha sido testigo de un crecimiento exponencial en la capacidad de computación y en el desarrollo de algoritmos de Inteligencia Artificial. No obstante, el combustible que alimenta estos algoritmos son los datos. En el ámbito clínico, los datos son intrínsecamente sensibles, ya que contienen Información de Identificación Personal (PII) y datos médicos altamente confidenciales. En respuesta a los crecientes riesgos de ciberseguridad y abusos corporativos, legislaciones como el Reglamento General de Protección de Datos (GDPR) en la Unión Europea o la ley HIPAA en Estados Unidos han establecido marcos normativos extremadamente estrictos para proteger a los ciudadanos.
 
-Seguramente necesites contextualizar el tema de estudio en la actualidad
-y en el contexto donde se va a aplicar de forma muy general. Es decir,
-habla de lo que dicen los ámbitos científico, social y educativo hoy en
-día respecto al tema tratado sin mucha profundidad (CONSEJO GENERAL:
-Dedícale un pequeño párrafo a describir cada capítulo puede ser
-efectivo).]
+Estas normativas, aunque éticamente inobjetables y absolutamente necesarias, han generado un efecto colateral conocido como ``silos de datos''. Las instituciones hospitalarias, los centros de investigación y las empresas de tecnología sanitaria se encuentran frecuentemente paralizadas por el miedo a incurrir en infracciones legales que conllevan sanciones económicas devastadoras y un daño reputacional irreparable. En el entorno corporativo y académico actual, el proceso burocrático para acceder a un conjunto de datos clínicos reales —que involucra aprobaciones de comités de ética, revisiones del Delegado de Protección de Datos (DPO) y firmas de Acuerdos de Confidencialidad (NDA)— puede demorarse entre tres y seis meses. Esta métrica, conocida en la industria como \textit{Time-to-Data}, es actualmente el mayor cuello de botella para la innovación en salud digital.
+
+Históricamente, la solución a este problema ha sido la anonimización tradicional, consistente en la supresión de identificadores directos (nombres, documentos de identidad) y la generalización de identificadores indirectos (códigos postales, edades). Sin embargo, la literatura científica ha demostrado reiteradamente que estas técnicas son ineficaces. Ataques de reidentificación cruzando bases de datos aparentemente anónimas con información pública (como padrones electorales o redes sociales) han logrado desenmascarar a pacientes con un éxito alarmante. Por otro lado, aplicar técnicas de enmascaramiento agresivas destruye la integridad estadística del dataset; se pierde la correlación multivariante y la señal predictiva, volviendo los datos inútiles para el entrenamiento de modelos de Machine Learning. Existe, por tanto, un ``tira y afloja'' insalvable entre privacidad y utilidad.
+
+Es en este contexto de necesidad clínica y restricción legal donde surge la justificación primordial de este proyecto: el uso de Inteligencia Artificial Generativa para la síntesis de datos. A diferencia de la anonimización, que toma un paciente real y oculta sus rasgos, la síntesis de datos genera ``pacientes virtuales'' desde cero. Estos pacientes virtuales no existen en el mundo real, pero exhiben exactamente las mismas propiedades matemáticas, estadísticas y predictivas que la población original. Al ser datos generados artificialmente que no corresponden a ningún individuo de carne y hueso, eluden las restricciones del GDPR, permitiendo su libre circulación para la investigación científica.
+
+A nivel de motivación técnica y profesional, este proyecto se adentra en la frontera más avanzada del Deep Learning. Mientras que la generación de imágenes o texto natural ha alcanzado niveles de madurez asombrosos (con modelos como DALL-E o GPT), la generación de datos tabulares (filas y columnas, variables continuas y categóricas) sigue siendo un desafío mayúsculo abierto en la comunidad científica. Los datos tabulares carecen de la estructura espacial de una imagen o la estructura secuencial de un texto; presentan distribuciones multimodales, dependencias complejas y, frecuentemente, desbalanceos de clases extremos. La motivación técnica de este Trabajo de Fin de Máster es superar estos obstáculos implementando la tecnología más puntera: los Modelos Probabilísticos de Difusión (Diffusion Models), adaptándolos para operar sobre arquitecturas de datos tabulares y evaluando si logran desbancar a las aproximaciones previas basadas en Redes Generativas Antagónicas (GANs) y Autoencoders Variacionales (VAEs).
 
 \section{Presentación del proyecto y sus contenidos}
 
-[Describe de forma simple el problema que presentas y cómo tu proyecto
-contribuye a resolverlo. Posteriormente, haz un recorrido por la
-distribución de los contenidos en tu proyecto describiendo de forma
-simple los capítulos y apartados que vas a incluir, de forma lógica,
-para preparar al lector a su lectura.]
+Este Trabajo de Fin de Máster propone el desarrollo, implementación y evaluación exhaustiva de un marco tecnológico (\textit{framework}) de generación de datos sintéticos diseñado específicamente para entornos clínicos de alta sensibilidad. El núcleo del proyecto radica en la construcción algorítmica desde cero de un Modelo Probabilístico de Difusión y su contraste empírico frente a arquitecturas generativas de referencia en el estado del arte.
 
-[Se recomienda un tamaño de 5 a 10 páginas para este capítulo].
+El problema técnico sobre el que pivotará la experimentación empírica es la predicción de una patología en un conjunto de pacientes, un clásico problema de clasificación caracterizado por un severo desbalanceo de clases (donde la clase minoritaria de interés representa una fracción muy pequeña de los datos reales). Este escenario es el entorno de prueba ideal, ya que sintetizar datos que logren preservar la débil señal de la clase minoritaria es la prueba de fuego de cualquier modelo generativo.
+
+El proyecto no se limita meramente a la construcción matemática del algoritmo, sino que aborda la problemática desde una perspectiva holística de Ingeniería de Datos y Operaciones de Machine Learning (MLOps). Para ello, se ha diseñado un \textit{pipeline} de evaluación tridimensional que somete a los datos generados a auditorías de:
+\begin{itemize}
+    \item \textbf{Fidelidad Estadística:} Para demostrar que las distribuciones y correlaciones marginales son estadísticamente indistinguibles de la realidad.
+    \item \textbf{Utilidad Predictiva:} Para certificar que un algoritmo externo de Inteligencia Artificial, entrenado exclusivamente con los datos sintéticos, mantiene su precisión al ser desplegado en un entorno de pruebas real.
+    \item \textbf{Privacidad Empírica:} Para auditar matemáticamente los riesgos de memorización o inferencia, asegurando que los datos virtuales no constituyen una amenaza para la privacidad del conjunto de entrenamiento y cumplen con las directrices legales.
+\end{itemize}
+
+Para abordar esta compleja labor investigativa de manera ordenada y académica, la presente memoria se ha estructurado en seis capítulos principales. 
+
+El presente \textbf{Capítulo 1} ha introducido el contexto, la motivación y la presentación general del problema abordado. 
+
+El \textbf{Capítulo 2} detallará formalmente el objetivo general del Trabajo de Fin de Máster, así como los objetivos específicos que actúan como hitos secuenciales para su consecución. 
+
+El \textbf{Capítulo 3} conformará el Marco Teórico y el Estado del Arte. En esta sección se realizará una inmersión profunda en la literatura científica, abordando las fundamentaciones matemáticas de los distintos modelos generativos, las definiciones teóricas de la privacidad de datos y el contexto regulatorio vigente.
+
+El \textbf{Capítulo 4} describirá el Marco Metodológico. Se expondrá con un elevado nivel de detalle técnico el flujo de trabajo ejecutado, desde la exploración inicial y preprocesamiento de la muestra clínica, hasta la arquitectura interna de las redes neuronales desarrolladas y las métricas formales utilizadas en el ecosistema de evaluación tridimensional.
+
+El \textbf{Capítulo 5} albergará el núcleo empírico del proyecto: la Presentación de Análisis, Resultados y Discusión. En este capítulo se volcarán todas las métricas, gráficas y tablas de rendimiento, comparando la eficacia de la tecnología de difusión frente a los modelos clásicos, explicando los fenómenos estadísticos detectados, realizando estudios de ablación sobre los componentes de la red y calculando el impacto final en el entorno corporativo.
+
+Finalmente, el \textbf{Capítulo 6} presentará las Conclusiones del estudio, donde se verificará el cumplimiento de los objetivos iniciales, se expondrán las limitaciones encontradas durante el desarrollo técnico y se propondrán líneas de investigación prospectivas, cerrando la memoria con una reflexión crítica sobre el proceso de aprendizaje adquirido y las competencias desarrolladas a lo largo del Máster.

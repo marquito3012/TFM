@@ -3,27 +3,43 @@
 % =============================================================================
 \chapterUnnumbered{Capítulo 2: Objetivos del TFM}
 
-[En un párrafo explica brevemente los contenidos de este capítulo. Se
-recomienda un tamaño de 1 a 3 páginas para este capítulo.]
+El desarrollo de un proyecto de ingeniería aplicada en el dominio de la Inteligencia Artificial requiere de una planificación estructurada y una definición clara de las metas a alcanzar. La complejidad inherente a la manipulación de datos clínicos confidenciales, sumada a los rigurosos estándares técnicos requeridos por las arquitecturas de Deep Learning modernas, hace imperativa la delineación de un rumbo preciso. En este capítulo se establecen formalmente las directrices que rigen el presente Trabajo de Fin de Máster. En primer lugar, se formulará el objetivo general, el cual encapsula la misión final y el propósito principal de la investigación. A continuación, este propósito se descompondrá metodológicamente en una serie de objetivos específicos secuenciales, los cuales funcionan como hitos operativos que guiarán las fases de estudio teórico, implementación técnica, evaluación empírica y auditoría de privacidad.
 
 \setcounter{section}{0}
 \section{Objetivo general}
 
+El objetivo general que vertebra y da sentido a toda la labor investigativa y de desarrollo de este Trabajo de Fin de Máster se enuncia a continuación:
+
 \begin{itemize}
-  \item{} [El objetivo general es lo que pretendes hacer con el TFG. El
-  último paso a realizar. Redáctalo en infinitivo y solo un verbo.]
+  \item \textbf{Desarrollar y evaluar empíricamente un ecosistema basado en Inteligencia Artificial Generativa capaz de sintetizar gemelos de datos tabulares clínicos que certifiquen el cumplimiento legal de privacidad sin degradar la utilidad predictiva subyacente.}
 \end{itemize}
+
+Para comprender la magnitud y el alcance de este objetivo general, es preciso realizar varias puntualizaciones. El verbo rector elegido es ``desarrollar'', lo que implica que este proyecto no se limita a un mero ejercicio de revisión bibliográfica o a la utilización pasiva de herramientas de terceros preexistentes. Por el contrario, exige un esfuerzo constructivo de ingeniería de software, centrado en la implementación algorítmica y la orquestación de un \textit{pipeline} completo de Operaciones de Machine Learning (MLOps). 
+
+Asimismo, la mención explícita a la evaluación empírica subraya el carácter científico de la propuesta; no basta con generar un modelo funcional, sino que es estrictamente necesario someter sus resultados a auditorías matemáticas rigurosas. La finalidad última no es otra que demostrar que es posible quebrar el histórico paradigma que obliga a elegir entre proteger la identidad del paciente o aprovechar el valor estadístico de su información. El éxito de este objetivo general proporcionará un marco tecnológico listo para ser integrado en entornos corporativos, logrando minimizar el \textit{Time-to-Data} y habilitando un escenario de investigación médica segura y ágil.
 
 \section{Objetivos específicos}
 
+Para garantizar la consecución sistemática y ordenada del objetivo general expuesto, el proyecto de investigación se ha subdividido y estructurado en cinco objetivos específicos. Cada uno de estos objetivos aborda una fase metodológica crítica, desde la fundamentación teórica hasta la validación del producto final.
+
 \begin{enumerate}
-  \item{} [Los objetivos específicos son las partes en las que subdivides el
-  trabajo para completar el objetivo general]
-  \item{} [No uses más de 4--6.]
-  \item{} [Siempre redactados en infinitivo.]
-  \item{} [Los objetivos no son deseos para el futuro. Cuando terminas el
-  proyecto se deben haber cumplido.]
-  \item{} [Lo mejor es poner un objetivo para el marco teórico, otro para el
-  metodológico, para el empírico, etc. Es decir, trocear el objetivo
-  final en pequeñas metas volantes ;)]
+  \item \textbf{Consolidar el estado del arte respecto a las arquitecturas generativas y los marcos normativos de privacidad de datos.} 
+  
+  Antes de acometer cualquier desarrollo, resulta indispensable mapear la literatura científica actual. Este objetivo implica investigar en profundidad las matemáticas subyacentes de las Redes Generativas Antagónicas (GANs), los Autoencoders Variacionales (VAEs) y, especialmente, la vanguardia de los Modelos Probabilísticos de Difusión. Simultáneamente, requiere analizar exhaustivamente el Reglamento General de Protección de Datos (GDPR) y los dictámenes del Grupo de Trabajo del Artículo 29 para definir legalmente qué constituye un dato verdaderamente anónimo.
+
+  \item \textbf{Diseñar un flujo de preprocesamiento e ingeniería de características adaptado a entornos clínicos de alta dimensionalidad.}
+  
+  Los historiales médicos electrónicos en su forma cruda son incompatibles con los tensores de entrada requeridos por las redes neuronales profundas. Este objetivo se enfoca en la purga de inconsistencias lógicas, el tratamiento de valores ausentes estructurales, la reducción de la cardinalidad en codificaciones clínicas y la estandarización de espacios continuos y discretos. Resulta vital en esta etapa formular una estrategia robusta para lidiar con el severo desbalanceo de clases que caracteriza a la predicción de patologías poco frecuentes.
+
+  \item \textbf{Implementar y optimizar una arquitectura generativa basada en procesos de difusión probabilística para el dominio tabular.}
+  
+  Este constituye el núcleo ingenieril del proyecto. El objetivo es construir computacionalmente, de manera nativa, un algoritmo capaz de destruir la información clínica mediante cadenas de Markov controladas (adición progresiva de ruido gaussiano) y, subsiguientemente, entrenar una red neuronal de \textit{Denoising} para revertir este proceso. El hito técnico consiste en lograr que este modelo converja en un espacio latente mixto (numérico y categórico), superando las limitaciones arquitectónicas tradicionales que sufren otros enfoques generativos.
+
+  \item \textbf{Diseñar un protocolo de evaluación bidimensional para auditar la fidelidad estadística y la utilidad predictiva de los gemelos sintéticos.}
+  
+  La generación de datos carece de valor si no puede cuantificarse su realismo. Para cumplir este objetivo, se deben establecer métricas matemáticas precisas (como la Distancia de Wasserstein y la Diferencia de Matrices de Correlación MAE) que certifiquen la preservación de las distribuciones marginales bivariantes. En paralelo, se debe ejecutar el paradigma TSTR (\textit{Train on Synthetic, Test on Real}), entrenando algoritmos supervisados externos exclusivamente con datos virtuales para certificar empíricamente su rendimiento y paridad en el mundo real.
+
+  \item \textbf{Ejecutar auditorías de privacidad empírica para cuantificar la vulnerabilidad frente a vectores de ataque conocidos.}
+  
+  El último objetivo específico asegura la viabilidad legal y ética del ecosistema desarrollado. Se requiere calcular el Riesgo de Memorización determinando la distancia euclídea del registro sintético más cercano a cualquier registro original (Métrica DCR). Además, se deben orquestar simulaciones de Ataques de Inferencia de Membresía (MIA), entrenando modelos adversarios que intenten deducir si un paciente específico pertenecía al conjunto de datos de entrenamiento, garantizando que su probabilidad de éxito no sea estadísticamente superior a una selección aleatoria.
 \end{enumerate}
