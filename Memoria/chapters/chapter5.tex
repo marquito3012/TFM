@@ -13,7 +13,7 @@ Los resultados se estructuran en tres dimensiones analíticas fundamentales: en 
 
 La primera premisa de un modelo generativo es su capacidad reconstructiva subyacente. Los datos no deben meramente "parecer" reales a nivel marginal (columna por columna), sino que deben preservar el delicado tejido de interdependencias multivariantes clínicas, tales como la correlación inherente entre el diagnóstico de una neuropatía y la consecuente administración prolongada de metformina.
 
-Para cuantificar este fenómeno, se calculó la Divergencia de Matrices de Correlación MAE (\textit{Mean Absolute Error}). Esta métrica mide la disimilitud absoluta media entre la matriz de correlación empírica calculada sobre los 99.340 pacientes biológicos reales frente a la matriz construida por los pacientes virtuales. Las Figuras \ref{fig:corr_diff_ctgan}, \ref{fig:corr_diff_tvae} y \ref{fig:corr_diff_tabddpm} exponen los mapas de calor (\textit{heatmaps}) residuales. En estos mapas, un tono azul oscuro indica la supresión artificial de una correlación existente, un tono rojo sangre indica la invención de una correlación espuria que no existía en la vida real, y el blanco absoluto testifica la clonación perfecta del patrón biológico.
+Para cuantificar este fenómeno, se calculó la Divergencia de Matrices de Correlación MAE (\textit{Mean Absolute Error}). Esta métrica mide la disimilitud absoluta media entre la matriz de correlación empírica calculada sobre los 99.340 pacientes biológicos reales frente a la matriz construida por los pacientes virtuales. Las Figuras \ref{fig:corr_diff_ctgan}, \ref{fig:corr_diff_tvae} y \ref{fig:corr_diff_tabddpm} exponen los mapas de calor (\textit{heatmaps}) residuales. En estos mapas, un tono azul oscuro indica la supresión artificial de una correlación existente, los tonos rojizos indican la sobreestimación de una correlación espuria que no existía en la vida real, y el blanco absoluto testifica la reproducción exacta de la correlación de las variables clínicas.
 
 \begin{figure}[htbp]
     \centering
@@ -36,13 +36,13 @@ Para cuantificar este fenómeno, se calculó la Divergencia de Matrices de Corre
     \label{fig:corr_diff_tabddpm}
 \end{figure}
 
-El análisis visual y matemático de las matrices constata que el \textit{Baseline Adversarial} (CTGAN) adolece de alucinaciones estadísticas severas, inventando cruces espurios a causa del colapso de modo. Por el contrario, la red de difusión \textit{TabDDPM} logra cristalizar las correlaciones con una pérdida ínfima. El proceso iterativo de eliminación de ruido logra capturar las sutilezas geométricas sin comprimirlas letalmente como hace el modelo \textit{TVAE}.
+El análisis visual y matemático de las matrices constata que el \textit{Baseline Adversarial} (CTGAN) adolece de desviaciones estadísticas significativas, inventando cruces espurios a causa del colapso de modo. Por el contrario, la red de difusión \textit{TabDDPM} logra reproducir las correlaciones con una pérdida ínfima. El proceso iterativo de eliminación de ruido logra capturar las sutilezas geométricas sin perder la estructura fina de correlación como hace el modelo \textit{TVAE}.
 
 \section{Utilidad Predictiva: Evaluación TSTR}
 
 Superada la validación estructural, la investigación abordó el eje más crítico para el sector sanitario corporativo: la viabilidad operativa. Para ello, se aplicó estrictamente el protocolo TSTR (\textit{Train on Synthetic, Test on Real}), delegando en \textit{XGBoost} la labor de discriminar a los pacientes con alta probabilidad de reingreso en las Unidades de Cuidados Intensivos (UCI).
 
-La Tabla \ref{tab:tstr_results} expone las métricas comparativas del oráculo al ser entrenado de forma aislada con cada volumen de datos. El \textit{Baseline Real} marca el techo de cristal de este problema médico altamente desbalanceado: entrenando el oráculo XGBoost exclusivamente con datos biológicos reales, se alcanza un F1-Score máximo de 0.6950 en el conjunto de prueba aislado (\textit{Holdout Set}).
+La Tabla \ref{tab:tstr_results} expone las métricas comparativas del oráculo al ser entrenado de forma aislada con cada volumen de datos. El \textit{Baseline Real} marca el techo de cristal de este problema médico altamente desbalanceado: entrenando el modelo XGBoost exclusivamente con datos biológicos reales, se alcanza un F1-Score máximo de 0.6950 en el conjunto de prueba aislado (\textit{Holdout Set}).
 
 \begin{table}[htbp]
 \centering
@@ -60,7 +60,7 @@ CTGAN (Red Antagónica) & 0.7250 & 0.6016 & -9.34\% \\
 \end{tabular}
 \end{table}
 
-Los resultados atestiguan un dominio arrollador del modelo probabilístico de difusión. Mientras que el TVAE colapsa estrepitosamente debido a la penalización de la Divergencia KL sobre las clases poco frecuentes (precipitando el rendimiento un -41.0\%), TabDDPM logra reconstruir las intrincadas fronteras de decisión de los pacientes de riesgo crítico, cediendo tan solo un \textbf{-0.27\%} frente al oráculo real inmaculado. Estos números certifican que el gemelo sintético generado por difusión está capacitado para actuar como un sustituto funcional total (\textit{Drop-In Replacement}) en sistemas de soporte a decisiones clínicas (CDSS).
+Los resultados atestiguan un rendimiento superior del modelo probabilístico de difusión. Mientras que el TVAE colapsa estrepitosamente debido a la penalización de la Divergencia KL sobre las clases poco frecuentes (precipitando el rendimiento un -41.0\%), TabDDPM logra reconstruir las intrincadas fronteras de decisión de los pacientes de riesgo crítico, cediendo tan solo un \textbf{-0.27\%} frente al modelo baseline entrenado con datos reales. Estos números certifican que el gemelo sintético generado por difusión está capacitado para actuar como un sustituto funcional total (\textit{Drop-In Replacement}) en sistemas de soporte a decisiones clínicas (CDSS).
 
 \section{Estudio de Ablación Intra-Arquitectónico}
 
@@ -81,7 +81,7 @@ Lineal (\textit{Linear Schedule}), $T=1000$ & 0.6918 & Computacionalmente Inefic
 \end{tabular}
 \end{table}
 
-A diferencia de los modelos de síntesis de imágenes (donde un planificador de coseno suavizado es indiscutiblemente superior para tratar las transiciones de color en los píxeles), los tensores médicos con variables discretas severas reclaman un decaimiento lineal agreste. Paralelamente, se infirió que doblar el estrato temporal a $T=1000$ pasos colapsaba asintóticamente la ganancia de utilidad, traduciéndose en un desperdicio injustificable de memoria de acceso aleatorio (VRAM) en las tarjetas gráficas AMD Radeon RX 9070. Consecuentemente, el vector \textit{Lineal-500} se consagró como la parametrización canónica para la infraestructura.
+A diferencia de los modelos de síntesis de imágenes (donde un planificador de coseno suavizado es indiscutiblemente superior para tratar las transiciones de color en los píxeles), los tensores médicos con variables discretas severas reclaman un decaimiento lineal abrupto. Paralelamente, se infirió que doblar el estrato temporal a $T=1000$ pasos colapsaba asintóticamente la ganancia de utilidad, traduciéndose en un desperdicio injustificable de memoria de acceso aleatorio (VRAM) en las tarjetas gráficas AMD Radeon RX 9070. Consecuentemente, el vector \textit{Lineal-500} se consagró como la parametrización canónica para la infraestructura.
 
 \section{Auditoría Legal y Privacidad Empírica (GDPR)}
 
@@ -89,7 +89,7 @@ El colofón metodológico recae sobre la viabilidad regulatoria. La utilidad exc
 
 \subsection{Distancia de Riesgo de Memorización (DCR)}
 
-El cálculo del Riesgo de Memorización (DCR - \textit{Distance to Closest Record}) dictaminó que ningún registro sintético es un calco biológico. Como expone el histograma de densidad empírica de la Figura \ref{fig:dcr_distribution}, la frontera euclidiana mínima observada en el conjunto sintético emanado de la difusión asciende a \textbf{0.39}. La ausencia absoluta de tensores con $DCR=0.0$ ratifica estadísticamente la inexistencia de filtraciones (data leaks) y anula el riesgo de "Individualización" estipulado en las directivas del Artículo 29 europeo.
+El cálculo del Riesgo de Memorización (DCR - \textit{Distance to Closest Record}) dictaminó que ningún registro sintético es una réplica exacta de un paciente real. Como expone el histograma de densidad empírica de la Figura \ref{fig:dcr_distribution}, la frontera euclidiana mínima observada en el conjunto sintético emanado de la difusión asciende a \textbf{0.39}. La ausencia absoluta de tensores con $DCR=0.0$ ratifica estadísticamente la ausencia de memorización directa (\textit{data leakage}) y anula el riesgo de ``individualización'' estipulado en las directivas del Artículo 29 europeo.
 
 \begin{figure}[htbp]
     \centering
@@ -100,6 +100,6 @@ El cálculo del Riesgo de Memorización (DCR - \textit{Distance to Closest Recor
 
 \subsection{Ataques Adversariales de Inferencia de Membresía (MIA)}
 
-Posteriormente, el modelo predictivo de caja blanca orquestado en modo de auditor se desplegó con la intención deliberada de inferir la pertenencia de pacientes concretos a la matriz original de entrenamiento hospitalario. Un resultado del $100\%$ supondría una catástrofe legal, posibilitando a un atacante vulnerar el anonimato del historial de admisiones de un ciudadano en riesgo de diabetes.
+Posteriormente, el modelo predictivo de caja blanca orquestado en modo de auditor se desplegó con la intención deliberada de inferir la pertenencia de pacientes concretos a la matriz original de entrenamiento hospitalario. Un resultado del $100\%$ supondría un incumplimiento del estándar de anonimización, posibilitando a un atacante vulnerar el anonimato del historial de admisiones de un ciudadano en riesgo de diabetes.
 
-No obstante, el modelo adversarial capituló al intentar atravesar la capa estocástica del proceso inverso de difusión. El rendimiento del Ataque MIA sobre TabDDPM devolvió una curva ROC-AUC de \textbf{0.501}. Al fijarse en la paridad absoluta con el 0.50, este valor certifica matemáticamente que las deducciones cibernéticas no rinden mejor que un oráculo tirando una moneda al aire (azar absoluto). Por transitividad, los datos sintéticos heredan legalmente el estatus de ``anonimización irreversible'', posibilitando su circulación libre de sanciones, allanando el cumplimiento corporativo (Compliance) y reduciendo el fatídico \textit{Time-to-Data} clínico.
+No obstante, el modelo clasificador del atacante no logró superar la capa estocástica del proceso inverso de difusión. El rendimiento del Ataque MIA sobre TabDDPM devolvió una curva ROC-AUC de \textbf{0.501}. Al fijarse en la paridad absoluta con el 0.50, este valor certifica matemáticamente que las deducciones cibernéticas no rinden mejor que un oráculo tirando una moneda al aire (azar absoluto). Por transitividad, los datos sintéticos heredan legalmente el estatus de ``anonimización irreversible'', posibilitando su circulación libre de sanciones, allanando el cumplimiento corporativo (Compliance) y reduciendo el prolongado \textit{Time-to-Data} clínico.

@@ -51,7 +51,7 @@ El siguiente bloque demuestra la instanciación de la arquitectura de difusión 
 
 \begin{verbatim}
 import torch
-from sdv.single_table import GaussianCopulaSynthesizer
+from sdv.single_table import TabDDPMSynthesizer
 # Nota: La implementación customizada de TabDDPM hereda de los 
 # principios de PyTorch y es acoplada al pipeline de SDV para compatibilidad.
 
@@ -67,8 +67,6 @@ tabddpm_config = {
     'noise_schedule': 'linear',
     'mlp_dimensions': [256, 512, 1024, 512, 256],
     'learning_rate': 2e-4
-}
-
 }
 
 # 3. Ingesta del tensor de pacientes y ajuste (Proceso Forward + Denoising)
