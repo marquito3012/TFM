@@ -30,6 +30,14 @@ En el conjunto original, esta variable exhibía tres categorías (``NO'', ``>30'
 
 Cualquier modelo de IA tradicional tendería a colapsar y predecir simplemente que ningún paciente reingresa, obteniendo de este modo una precisión base artificialmente alta del 88.6\%. Por lo tanto, obligar a una red neuronal generativa a capturar el minúsculo patrón subyacente del 11.4\% sin destruirlo bajo el peso de la clase dominante constituye un desafío de modelado estadístico representativo de este estudio.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{class_distribution.png}
+    \caption{Distribución de la variable objetivo binarizada (Clase Mayoritaria vs. Clase Minoritaria Crítica) obtenida del conjunto de datos clínico original.}
+    \label{fig:class_distribution}
+\end{figure}
+
+
 \subsection{Ingeniería de Características y Limpieza}
 
 Previo a la ingesta del tensor por las redes neuronales, se orquestó una rigurosa tubería (\textit{pipeline}) de Ingeniería de Características y Limpieza de datos. En primer lugar, se aplicó un criterio de exclusión clínica eliminando \textbf{2.423 registros} correspondientes a pacientes fallecidos o dados de alta hacia cuidados paliativos (\textit{hospice}), ya que su inclusión introduciría un sesgo artificial en la predicción de reingresos a corto plazo. Adicionalmente, se purgaron \textbf{3 registros} debido a inconsistencias de codificación en la variable de género. Esta depuración de filas redujo la muestra original de 101.766 a un conjunto maestro consolidado de exactamente \textbf{99.340 registros}, garantizando una trazabilidad exacta del flujo de datos. En segundo lugar, se suprimieron columnas con un grado de completitud nulo extremo (como la variable \texttt{weight} con un 96.86\% de valores faltantes o \texttt{payer\_code}) e identificadores técnicos sin valor predictivo (\texttt{encounter\_id} y \texttt{patient\_nbr}), reduciendo el espacio de variables de 50 a un total de \textbf{39 columnas} clínicas útiles. Las variables categóricas con alta cardinalidad (como los códigos médicos ICD-9 originales que presentan más de 700 valores distintos) fueron consolidadas y colapsadas en 9 categorías clínicas estándar para optimizar el aprendizaje del motor generativo. Tras este proceso de sanitización, el conjunto consolidado garantizó la total ausencia de valores nulos (NaNs), estabilizando el cálculo del gradiente de error.
