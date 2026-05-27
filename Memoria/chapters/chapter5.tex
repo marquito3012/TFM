@@ -169,7 +169,7 @@ El cálculo del Riesgo de Memorización (DCR -- \textit{Distance to Closest Reco
 \centering
 \caption{Resumen de Métricas DCR (\textit{Distance to Closest Record}) por Modelo}
 \label{tab:dcr_results}
-\begin{tabular}{>{\raggedright\arraybackslash}p{3.5cm} c c c c}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\centering\arraybackslash}p{2.2cm} >{\centering\arraybackslash}p{2.2cm} >{\centering\arraybackslash}p{2.4cm} >{\centering\arraybackslash}p{2.8cm}}
 \toprule
 \textbf{Modelo} & \textbf{DCR Mín.} & \textbf{DCR Medio} & \textbf{DCR Mediano} & \textbf{Copia ($<0.01$)} \\
 \midrule
@@ -177,7 +177,7 @@ El cálculo del Riesgo de Memorización (DCR -- \textit{Distance to Closest Reco
 TVAE & 0.0444 & 2.2754 & 2.1221 & 0.00\% \\
 \rowcolor{uaxblue!10} \textbf{TabDDPM} & \textbf{0.3938} & \textbf{2.8831} & \textbf{2.7611} & \textbf{0.00\%} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 El dictaminó que ningún registro sintético es una réplica exacta de un paciente real en ninguno de los tres modelos (riesgo de copia del $0.00\%$ en los tres casos). No obstante, la magnitud del DCR mínimo es reveladora: \textbf{TabDDPM} mantiene una distancia de seguridad mínima de $\mathbf{0.3938}$, frente a los $0.1196$ de CTGAN y los apenas $0.0444$ del TVAE. La mayor distancia mínima del modelo de difusión es una consecuencia directa de su proceso de generación: al muestrear desde ruido gaussiano puro y reconstruir iterativamente, la red de denoising introduce inherentemente variabilidad estocástica en cada paso, dificultando la convergencia hacia ningún punto exacto del espacio de entrenamiento.
@@ -199,7 +199,7 @@ Posteriormente, el modelo predictivo de caja blanca orquestado en modo de audito
 \centering
 \caption{Resultados de los Ataques de Inferencia de Membresía (MIA) por Modelo}
 \label{tab:mia_results}
-\begin{tabular}{>{\raggedright\arraybackslash}p{3.5cm} c c c}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\centering\arraybackslash}p{2.8cm} >{\centering\arraybackslash}p{3.5cm} >{\centering\arraybackslash}p{2.5cm}}
 \toprule
 \textbf{Modelo} & \textbf{AUC Atacante} & \textbf{Accuracy Atacante} & \textbf{Privacidad} \\
 \midrule
@@ -209,7 +209,7 @@ TVAE & 0.5022 & 0.6618 & Excelente \\
 \midrule
 \textit{Ref. aleatoria} & \textit{0.5000} & \textit{0.5000} & \textit{---} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 No obstante, el modelo clasificador del atacante no logró superar la capa estocástica del proceso inverso de difusión. El rendimiento del Ataque MIA sobre TabDDPM devolvió una curva ROC-AUC de \textbf{0.5033}. Al fijarse en la paridad absoluta con el $0.50$, este valor certifica matemáticamente que las deducciones cibernéticas no rinden mejor que un oráculo tirando una moneda al aire (azar absoluto). Los tres modelos alcanzan valores de AUC estadísticamente indistinguibles del azar, lo que demuestra que ninguna de las arquitecturas evaluadas filtra información de membresía a través de sus datos sintéticos. Por transitividad, los datos sintéticos heredan legalmente el estatus de ``anonimización irreversible'', posibilitando su circulación libre de sanciones, allanando el cumplimiento corporativo (Compliance) y reduciendo el prolongado \textit{Time-to-Data} clínico.

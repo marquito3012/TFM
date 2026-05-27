@@ -132,16 +132,16 @@ La fase de implementación se centró en la arquitectura probabilística \textbf
 \centering
 \caption{Composición del Vector de Entrada al Modelo TabDDPM (Dimensión Total: 139)}
 \label{tab:ohe_dims}
-\begin{tabular}{l c c}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\centering\arraybackslash}p{4.2cm} >{\centering\arraybackslash}p{4.2cm}}
 \toprule
-\textbf{Grupo de variables} & \textbf{Nº variables originales} & \textbf{Dimensiones en el tensor} \\
+\textbf{Grupo de variables} & \textbf{Variables originales} & \textbf{Dimensiones en el tensor} \\
 \midrule
 \rowcolor{gray!10} Numéricas (StandardScaler) & 9 & 9 \\
 Categóricas (One-Hot Encoding) & 30 & 130 \\
 \midrule
 \rowcolor{uaxblue!10} \textbf{Total} & \textbf{39} & \textbf{139} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 El vector resultante de 139 dimensiones es procesado por la capa de proyección de entrada (\texttt{input\_proj}) de la red \texttt{DenoisingMLP}. En la fase de inferencia (muestreo), el tensor de salida de 139 dimensiones es decodificado mediante la transformada inversa del preprocesador, aplicando la transformación inversa del \textit{StandardScaler} para las variables numéricas y un operador de máxima probabilidad (\textit{argmax}) en cada bloque OHE para reconstruir el valor categórico discreto original.
