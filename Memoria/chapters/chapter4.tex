@@ -8,7 +8,7 @@ Este capítulo detalla la metodología adoptada para el desarrollo y validación
 \setcounter{section}{0}
 \section{Infraestructura y Entorno de Ejecución}
 
-La síntesis de datos tabulares a gran escala mediante Modelos Probabilísticos de Difusión exige una capacidad de cómputo sustancial. El paradigma de adición iterativa de ruido (Proceso Forward) y la posterior predicción de la corrección estocástica (Proceso Inverso) a lo largo de cientos de pasos temporales genera una limitación computacional crítica para las Unidades Centrales de Procesamiento (CPU) tradicionales. 
+La síntesis de datos tabulares a gran escala mediante Modelos Probabilísticos de Difusión exige una capacidad de cómputo sustancial. El paradigma de adición iterativa de ruido (Proceso Forward) y la posterior predicción de la corrección estocástica (Proceso Inverso) a lo largo de cientos de pasos temporales genera una limitación computacional crítica para las Unidades Centrales de Procesamiento (CPU) tradicionales.
 
 Para solventar esta barrera, la experimentación técnica de este proyecto fue delegada en su totalidad a un entorno de computación acelerada por \textit{hardware}. El clúster físico utilizado está equipado con una Unidad de Procesamiento Gráfico (GPU) \textbf{AMD Radeon RX 9070}. Esta arquitectura gráfica proporcionó el paralelismo masivo necesario para computar la multiplicación de tensores requerida durante el proceso de retropropagación (\textit{backpropagation}).
 
@@ -26,7 +26,7 @@ El volumen bruto original comprende un total de \textbf{101.766 historias clíni
 
 El núcleo del desafío algorítmico gravita en torno a la variable objetivo (el \textit{target}): la predicción del reingreso hospitalario temprano, denotado por la columna \texttt{readmitted}. En el contexto sanitario, anticipar si un paciente diabético va a sufrir una recaída y deberá ser reingresado en los próximos 30 días es una métrica vital para mitigar la saturación de los servicios de urgencias y optimizar la gestión global de los recursos hospitalarios de hospitalización general.
 
-En el conjunto original, esta variable exhibía tres categorías (``NO'', ``>30'', ``<30''). Para enfocar el problema hacia un objetivo de optimización operativa, la variable fue binarizada en dos clases fundamentales: \textit{Reingreso Crítico} (pacientes readmitidos en menos de 30 días) frente a \textit{No Reingreso/Tardío}. Esta transformación expuso el mayor obstáculo técnico del proyecto: un severo desbalanceo de clases intrínseco. Aproximadamente el \textbf{88.6\%} de los pacientes pertenecían a la clase mayoritaria (pacientes estables), mientras que tan solo un \textbf{11.4\%} conformaban la clase minoritaria crítica. 
+En el conjunto original, esta variable exhibía tres categorías (``NO'', ``>30'', ``<30''). Para enfocar el problema hacia un objetivo de optimización operativa, la variable fue binarizada en dos clases fundamentales: \textit{Reingreso Crítico} (pacientes readmitidos en menos de 30 días) frente a \textit{No Reingreso/Tardío}. Esta transformación expuso el mayor obstáculo técnico del proyecto: un severo desbalanceo de clases intrínseco. Aproximadamente el \textbf{88.6\%} de los pacientes pertenecían a la clase mayoritaria (pacientes estables), mientras que tan solo un \textbf{11.4\%} conformaban la clase minoritaria crítica.
 
 Cualquier modelo de IA tradicional tendería a colapsar y predecir simplemente que ningún paciente reingresa, obteniendo de este modo una precisión base artificialmente alta del 88.6\%. Por lo tanto, obligar a una red neuronal generativa a capturar el minúsculo patrón subyacente del 11.4\% sin destruirlo bajo el peso de la clase dominante constituye un desafío de modelado estadístico representativo de este estudio.
 
@@ -42,9 +42,77 @@ Cualquier modelo de IA tradicional tendería a colapsar y predecir simplemente q
 
 Previo a la ingesta del tensor por las redes neuronales, se orquestó una rigurosa tubería (\textit{pipeline}) de Ingeniería de Características y Limpieza de datos. En primer lugar, se aplicó un criterio de exclusión clínica eliminando \textbf{2.423 registros} correspondientes a pacientes fallecidos o dados de alta hacia cuidados paliativos (\textit{hospice}), ya que su inclusión introduciría un sesgo artificial en la predicción de reingresos a corto plazo. Adicionalmente, se purgaron \textbf{3 registros} debido a inconsistencias de codificación en la variable de género. Esta depuración de filas redujo la muestra original de 101.766 a un conjunto maestro consolidado de exactamente \textbf{99.340 registros}, garantizando una trazabilidad exacta del flujo de datos. En segundo lugar, se suprimieron columnas con un grado de completitud nulo extremo (como la variable \texttt{weight} con un 96.86\% de valores faltantes o \texttt{payer\_code}) e identificadores técnicos sin valor predictivo (\texttt{encounter\_id} y \texttt{patient\_nbr}), reduciendo el espacio de variables de 50 a un total de \textbf{39 columnas} clínicas útiles. Las variables categóricas con alta cardinalidad (como los códigos médicos ICD-9 originales que presentan más de 700 valores distintos) fueron consolidadas y colapsadas en 9 categorías clínicas estándar para optimizar el aprendizaje del motor generativo. Tras este proceso de sanitización, el conjunto consolidado garantizó la total ausencia de valores nulos (NaNs), estabilizando el cálculo del gradiente de error.
 
+\subsection{Descripción del Espacio de Variables Consolidado}
+
+Tras la fase de limpieza e ingeniería de características, el conjunto de datos consolidado de 99.340 registros queda descrito por las 39 variables detalladas en la Tabla \ref{tab:variables}. Se distinguen dos grandes grupos: las \textbf{9 variables numéricas} (continuas o discretas), cuyos estadísticos descriptivos reflejan la complejidad de la casuística hospitalaria, y las \textbf{30 variables categóricas} (nominales u ordinales), que abarcan desde la demografía del paciente hasta la posología de 23 medicamentos antidiabéticos específicos.
+
+\begin{table}[htbp]
+\centering
+\caption{Espacio de Variables del Conjunto Clínico Consolidado (99.340 registros)}
+\label{tab:variables}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.8cm} l >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Variable} & \textbf{Tipo} & \textbf{Descripción clínica} \\
+\midrule
+\multicolumn{3}{l}{\textit{Variables Numéricas}} \\
+\midrule
+\rowcolor{gray!10} \texttt{time\_in\_hospital} & Discreta & Días de estancia hospitalaria (rango: 1--14) \\
+\texttt{num\_lab\_procedures} & Discreta & Número de análisis clínicos realizados (1--132) \\
+\rowcolor{gray!10} \texttt{num\_procedures} & Discreta & Número de procedimientos médicos (0--6) \\
+\texttt{num\_medications} & Discreta & Medicamentos distintos administrados (1--81) \\
+\rowcolor{gray!10} \texttt{number\_outpatient} & Discreta & Visitas ambulatorias en el año previo (0--42) \\
+\texttt{number\_emergency} & Discreta & Urgencias en el año previo (0--76) \\
+\rowcolor{gray!10} \texttt{number\_inpatient} & Discreta & Ingresos hospitalarios en el año previo (0--21) \\
+\texttt{number\_diagnoses} & Discreta & Diagnósticos registrados en el episodio (1--16) \\
+\rowcolor{gray!10} \texttt{prior\_visits} & Discreta & Visitas previas totales (variable construida: outpatient + emergency + inpatient) \\
+\midrule
+\multicolumn{3}{l}{\textit{Variables Categóricas (selección de las más representativas)}} \\
+\midrule
+\texttt{race} & Nominal & Etnia del paciente (5 categorías) \\
+\rowcolor{gray!10} \texttt{gender} & Binaria & Género del paciente \\
+\texttt{age} & Ordinal & Grupo de edad en intervalos de 10 años ([0-10] a [90-100]) \\
+\rowcolor{gray!10} \texttt{admission\_type\_id} & Nominal & Tipo de admisión (urgencia, electiva, recién nacido, etc.) \\
+\texttt{diag\_1 / diag\_2 / diag\_3} & Nominal & Diagnóstico primario y secundarios (9 macro-categorías ICD-9) \\
+\rowcolor{gray!10} \texttt{insulin} & Ordinal & Régimen de insulina (No, Steady, Up, Down) \\
+\texttt{metformin} & Ordinal & Régimen de metformina (No, Steady, Up, Down) \\
+\rowcolor{gray!10} \texttt{diabetesMed} & Binaria & Indicador de prescripción de medicación antidiabética \\
+\texttt{change} & Binaria & Cambio en la medicación durante el ingreso \\
+\rowcolor{gray!10} \texttt{readmitted} & Binaria & Variable objetivo: reingreso $<$30 días (1) vs. otro (0) \\
+\multicolumn{3}{l}{\footnotesize\textit{Nota: Se incluyen 19 columnas adicionales de medicamentos antidiabéticos (repaglinide, glipizide, etc.) no detalladas por brevedad.}} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Análisis Exploratorio Cuantitativo}
+
+Previo al entrenamiento de los modelos generativos, se realizó un Análisis Exploratorio de Datos (EDA) exhaustivo sobre el conjunto consolidado de 99.340 registros, documentado en el cuaderno \texttt{01\_eda\_detallado.ipynb}. La Tabla \ref{tab:eda_numericas} sintetiza los estadísticos descriptivos de las 9 variables numéricas tras la limpieza. Destacan varios patrones clínicamente relevantes: la elevada varianza en \texttt{num\_lab\_procedures} (desv. típica de 19.7), indicativa de la heterogeneidad de los protocolos diagnósticos entre hospitales; y la distribución fuertemente asimétrica y concentrada en cero de las variables de visitas previas (\texttt{number\_outpatient}, \texttt{number\_emergency}, \texttt{number\_inpatient}), características de distribuciones de eventos de cola larga (\textit{heavy-tailed}) que representan un reto adicional para los modelos generativos, ya que deben capturar tanto el pico en cero como los valores extremos infrecuentes.
+
+\begin{table}[htbp]
+\centering
+\caption{Estadísticos Descriptivos de las Variables Numéricas (Conjunto Consolidado, $n=99.340$)}
+\label{tab:eda_numericas}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.8cm} c c c c c}
+\toprule
+\textbf{Variable} & \textbf{Media} & \textbf{Desv. Típica} & \textbf{Mín.} & \textbf{Mediana} & \textbf{Máx.} \\
+\midrule
+\rowcolor{gray!10} \texttt{time\_in\_hospital} & 4.40 & 2.99 & 1 & 4 & 14 \\
+\texttt{num\_lab\_procedures} & 43.10 & 19.67 & 1 & 44 & 132 \\
+\rowcolor{gray!10} \texttt{num\_procedures} & 1.34 & 1.71 & 0 & 1 & 6 \\
+\texttt{num\_medications} & 16.00 & 8.07 & 1 & 15 & 81 \\
+\rowcolor{gray!10} \texttt{number\_outpatient} & 0.37 & 1.27 & 0 & 0 & 42 \\
+\texttt{number\_emergency} & 0.20 & 0.93 & 0 & 0 & 76 \\
+\rowcolor{gray!10} \texttt{number\_inpatient} & 0.57 & 1.24 & 0 & 0 & 21 \\
+\texttt{number\_diagnoses} & 7.40 & 1.94 & 1 & 8 & 16 \\
+\rowcolor{gray!10} \texttt{prior\_visits} & 1.13 & 2.17 & 0 & 0 & 100 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Respecto a las variables categóricas, el análisis de frecuencias reveló que la población mayoritaria corresponde a pacientes de raza caucásica (75.4\%), de género femenino (53.1\%) y en el grupo de edad de [70-80] años (21.6\%). La insulina es el medicamento antidiabético más prevalente, presente de forma activa en el 53.4\% de los registros, seguida de la metformina (con un régimen activo en el 30.5\%). Estos desequilibrios en la distribución de las variables categóricas constituyen un vector de complejidad adicional para los modelos generativos: el modelo debe aprender no solo las distribuciones marginales de cada variable, sino también las correlaciones cruzadas entre ellas (por ejemplo, la correlación entre el grupo de edad avanzada, la prescripción de insulina y la mayor frecuencia de reingresos).
+
 \section{Desarrollo e Implementación de Modelos Generativos}
 
-Para validar exhaustivamente la supremacía de la tecnología de difusión, la metodología no consistió en ejecutar el modelo en el vacío, sino en implementarlo y enfrentarlo algorítmicamente contra los dos grandes paradigmas reinantes de la IA Generativa adaptados al dominio tabular. 
+Para validar exhaustivamente la supremacía de la tecnología de difusión, la metodología no consistió en ejecutar el modelo en el vacío, sino en implementarlo y enfrentarlo algorítmicamente contra los dos grandes paradigmas reinantes de la IA Generativa adaptados al dominio tabular.
 
 \subsection{Línea Base Adversarial: CTGAN}
 
@@ -56,11 +124,38 @@ El segundo pilar consistió en el despliegue de un Autoencoder Variacional Tabul
 
 \subsection{Arquitectura Propuesta: TabDDPM}
 
-La fase de implementación se centró en la arquitectura probabilística \textbf{TabDDPM}. El modelo fue codificado desde sus cimientos para operar bajo un régimen de difusión escalonada. El hiperparámetro maestro del ecosistema fue fijado en $T = 500$ pasos temporales. Esta decisión no fue fortuita; a diferencia del ámbito de generación de imágenes donde las mallas convolucionales exigen típicamente $T=1000$ o superior, esta decisión de diseño se fundamenta en un compromiso óptimo entre la fidelidad del modelado y la eficiencia computacional. El incremento de pasos de difusión por encima de este umbral no aporta ganancias significativas en la utilidad predictiva y, por contra, eleva exponencialmente el consumo de recursos de la GPU AMD Radeon (la validación empírica de este comportamiento se detalla en el análisis de ablación del Capítulo 5).
+La fase de implementación se centró en la arquitectura probabilística \textbf{TabDDPM}. El modelo fue codificado desde sus cimientos para operar bajo un régimen de difusión escalonada. El hiperparámetro maestro del ecosistema fue fijado en $T = 1000$ pasos temporales para la configuración final de referencia (tal como se documenta en el estudio de ablación del Capítulo 5). El planificador de ruido (\textit{noise schedule}) fue parametrizado siguiendo un decaimiento lineal suave, con $\beta_1 = 10^{-4}$ y $\beta_T = 0.02$.
 
-Para operar sobre datos mixtos, el framework TabDDPM implementa una etapa de preprocesamiento acoplada. Las 9 variables numéricas continuas y discretas son normalizadas mediante un escalador estándar de media cero y varianza unitaria. Paralelamente, las 30 variables categóricas —incluyendo los diagnósticos clínicos ICD-9 previamente consolidados en 9 macro-categorías nominales— son sometidas a codificación One-Hot. Este proceso mapea la muestra clínica a un tensor continuo de entrada con una dimensión final exacta de 139 características. Dicho tensor de 139 dimensiones es recibido por la capa de proyección de entrada de la red DenoisingMLP, la cual proyecta el tensor al espacio oculto de 512 características configurado para el bucle de difusión. En la fase de inferencia (muestreo), el tensor de salida de 139 dimensiones es decodificado mediante una transformada inversa, aplicando un operador de máxima probabilidad (argmax) en cada bloque categórico para reconstruir fielmente el DataFrame clínico mixto original.
+\textbf{Etapa de Preprocesamiento.} Para operar sobre datos mixtos, el framework TabDDPM implementa una etapa de preprocesamiento acoplada mediante la clase \texttt{TabularPreprocessor}. Las \textbf{9 variables numéricas} continuas y discretas son normalizadas mediante un escalador estándar de media cero y varianza unitaria (\textit{StandardScaler}). Paralelamente, las \textbf{30 variables categóricas} —incluyendo los diagnósticos clínicos ICD-9 previamente consolidados en 9 macro-categorías nominales— son sometidas a codificación \textit{One-Hot} (OHE). La Tabla \ref{tab:ohe_dims} detalla la dimensionalidad resultante del vector latente tras la aplicación de este proceso de codificación mixta.
 
-El planificador de ruido (\textit{noise schedule}) fue parametrizado siguiendo un decaimiento lineal suave. La red de \textit{Denoising} principal se estructuró en torno a bloques MLP con alta capacidad inyectados transversalmente con las incrustaciones temporales (\textit{Timestep Embeddings}), lo que posibilitó a la red identificar geométricamente el estado de purga de ruido en cada instante. El tiempo total de entrenamiento e inferencia en este modelo representó la fase de mayor demanda de cómputo del proyecto.
+\begin{table}[htbp]
+\centering
+\caption{Composición del Vector de Entrada al Modelo TabDDPM (Dimensión Total: 139)}
+\label{tab:ohe_dims}
+\begin{tabular}{l c c}
+\toprule
+\textbf{Grupo de variables} & \textbf{Nº variables originales} & \textbf{Dimensiones en el tensor} \\
+\midrule
+\rowcolor{gray!10} Numéricas (StandardScaler) & 9 & 9 \\
+Categóricas (One-Hot Encoding) & 30 & 130 \\
+\midrule
+\rowcolor{uaxblue!10} \textbf{Total} & \textbf{39} & \textbf{139} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El vector resultante de 139 dimensiones es procesado por la capa de proyección de entrada (\texttt{input\_proj}) de la red \texttt{DenoisingMLP}. En la fase de inferencia (muestreo), el tensor de salida de 139 dimensiones es decodificado mediante la transformada inversa del preprocesador, aplicando la transformación inversa del \textit{StandardScaler} para las variables numéricas y un operador de máxima probabilidad (\textit{argmax}) en cada bloque OHE para reconstruir el valor categórico discreto original.
+
+\textbf{Arquitectura de la Red de Denoising (DenoisingMLP).} La red neuronal encargada de aprender el proceso inverso de difusión fue diseñada como un MLP con conexiones residuales (\textit{ResBlocks}) e integración del embedding del instante temporal. La arquitectura se descompone en los siguientes módulos:
+
+\begin{enumerate}
+    \item \textbf{Sinusoidal Timestep Embedding:} Inspirado en el mecanismo de codificación posicional de los Transformers \parencite{vaswani2017attention}, este módulo transforma el índice temporal escalar $t \in \{0, ..., T-1\}$ en un vector de alta dimensión (128 dimensiones) mediante la superposición de funciones sinusoidales de frecuencias logarítmicamente espaciadas. Esto permite a la red identificar geométricamente el nivel de degradación presente en su entrada $x_t$ sin necesidad de embeddings aprendidos.
+    \item \textbf{Capa de Proyección de Entrada:} Una capa lineal proyecta el vector de entrada de 139 dimensiones al espacio oculto de 512 características.
+    \item \textbf{Bloques Residuales (ResBlocks):} Tres bloques residuales secuenciales, cada uno compuesto por una capa de normalización de capas (\textit{LayerNorm}), dos capas lineales de 512 neuronas con activación SiLU (\textit{Sigmoid Linear Unit}), y una capa de proyección del embedding temporal. La contribución del embedding de instante se suma aditivamente a la activación de cada bloque, implementando el condicionamiento temporal de la red.
+    \item \textbf{Capa de Salida:} Una capa lineal proyecta de vuelta las 512 dimensiones ocultas a las 139 dimensiones del espacio de entrada, produciendo la predicción del ruido $\hat{\varepsilon}_\theta(x_t, t)$.
+\end{enumerate}
+
+La red \texttt{DenoisingMLP} resultante acumula un total de \textbf{1.097.483 parámetros entrenables}, optimizados mediante el algoritmo \textit{AdamW} con una tasa de aprendizaje de $10^{-3}$ y un decaimiento de pesos de $10^{-4}$. Un planificador de tasa de aprendizaje coseno (\textit{CosineAnnealingLR}) fue aplicado sobre el optimizador para reducir progresivamente la tasa de aprendizaje durante las fases finales del entrenamiento, favoreciendo la convergencia fina.
 
 \section{Diseño de Protocolos de Evaluación y Auditoría}
 
@@ -68,7 +163,7 @@ Un gemelo sintético no adquiere valor por su existencia, sino por las garantía
 
 \subsection{Protocolo TSTR (Train on Synthetic, Test on Real)}
 
-El paradigma TSTR materializó el eje de evaluación de Utilidad Predictiva. Originalmente, el dataset consolidado de 99.340 filas se dividió en dos particiones irreconciliables: un Conjunto de Entrenamiento (\textit{Train}, 70\%) y un Conjunto de Prueba del mundo real (\textit{Holdout Test}, 30\%). 
+El paradigma TSTR materializó el eje de evaluación de Utilidad Predictiva. Originalmente, el dataset consolidado de 99.340 filas se dividió en dos particiones irreconciliables: un Conjunto de Entrenamiento (\textit{Train}, 70\%) y un Conjunto de Prueba del mundo real (\textit{Holdout Test}, 30\%).
 
 Los tres modelos generativos estudiados (CTGAN, TVAE y TabDDPM) fueron nutridos única y exclusivamente con el 70\% del Conjunto de Entrenamiento, operando en total ceguera respecto al Conjunto de Prueba. Tras completarse sus épocas, cada generador sintetizó un volumen idéntico de datos virtuales. Estos datos ficticios fueron empleados para instruir tres instancias vírgenes y autónomas de un modelo clasificador \textbf{XGBoost} (uno por cada tecnología sintética). Finalmente, cada XGBoost se desplegó sobre el Conjunto de Prueba del mundo real (Holdout 30\%), midiendo su capacidad para predecir correctamente la clase minoritaria crítica. Las métricas cosechadas (F1-Score y AUC-ROC) fueron entonces comparadas contra un ``Oráculo Baseline'' que fue entrenado con datos reales (baseline TRTR). El modelo generativo que presente la menor brecha (\textit{gap}) respecto a este baseline presentará el mejor desempeño en utilidad predictiva.
 

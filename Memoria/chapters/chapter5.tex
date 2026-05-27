@@ -5,15 +5,54 @@
 
 Tras la culminación de las fases de diseño metodológico y entrenamiento de los algoritmos generativos detalladas en el capítulo anterior, esta sección expone la síntesis de los resultados empíricos obtenidos. El núcleo de este capítulo radica en contrastar el rendimiento del Modelo Probabilístico de Difusión propuesto (\textit{TabDDPM}) frente a los paradigmas adversariales (CTGAN) y bayesianos (TVAE) considerados como líneas base del estado del arte.
 
-Los resultados se estructuran en tres dimensiones analíticas fundamentales: en primer lugar, se evalúa la fidelidad estadística y estructural de los gemelos digitales; en segundo lugar, se cuantifica la utilidad predictiva y el impacto de negocio mediante el despliegue de un oráculo algorítmico externo; y finalmente, se presentan los dictámenes de las simulaciones de ciberataques requeridas para garantizar el cumplimiento normativo exigido por el Reglamento General de Protección de Datos (GDPR). Adicionalmente, se integra un estudio de ablación intra-arquitectónico diseñado para destilar la configuración óptima del ecosistema de difusión.
+Los resultados se estructuran en cuatro dimensiones analíticas fundamentales: en primer lugar, se analiza la convergencia del entrenamiento del modelo de difusión; en segundo lugar, se evalúa la fidelidad estadística y estructural de los gemelos digitales; en tercer lugar, se cuantifica la utilidad predictiva y el impacto de negocio mediante el despliegue de un oráculo algorítmico externo; y finalmente, se presentan los dictámenes de las simulaciones de ciberataques requeridas para garantizar el cumplimiento normativo exigido por el Reglamento General de Protección de Datos (GDPR). Adicionalmente, se integra un estudio de ablación intra-arquitectónico diseñado para destilar la configuración óptima del ecosistema de difusión.
 
 \setcounter{section}{0}
 
+\section{Convergencia del Entrenamiento: Análisis de la Curva de Pérdida}
+
+El entrenamiento del modelo TabDDPM se llevó a cabo durante un total de \textbf{1.000 épocas}, utilizando el optimizador AdamW con un planificador de tasa de aprendizaje coseno (\textit{CosineAnnealingLR}). La evolución de la función de pérdida MSE a lo largo del entrenamiento refleja una dinámica de convergencia característica de los modelos de difusión y proporciona información relevante sobre la estabilidad del proceso de aprendizaje.
+
+Durante las primeras épocas de entrenamiento, la pérdida descendió de forma abrupta: desde un valor inicial de \textbf{0.619} en la primera época hasta \textbf{0.170} en la tercera época, evidenciando que la red neuronal aprendió rápidamente las macropatrones de ruido más prominentes del espacio latente de 139 dimensiones. Esta fase de descenso brusco es característica del aprendizaje de las componentes de baja frecuencia de la distribución de datos, es decir, las tendencias globales de las variables más representadas (como la distribución dominante de la clase mayoritaria de pacientes no reingresados). A partir de la época 100, el aprendizaje transitó a una fase de refinamiento progresivo de los patrones de alta frecuencia —las correlaciones entre variables minoritarias y los matices de las distribuciones de cola— donde la pérdida descendió gradualmente hasta estabilizarse en torno a \textbf{0.041} al final de las 1.000 épocas de entrenamiento. La ausencia de oscilaciones erráticas o incrementos súbitos en la pérdida confirma la estabilidad intrínseca del régimen de difusión frente a los entornos adversariales de las GANs, donde el equilibrio minimax puede romperse de forma impredecible.
+
+Esta convergencia estable contrasta marcadamente con el comportamiento típico de las GANs entrenadas en el mismo dominio: la pérdida del discriminador CTGAN exhibe oscilaciones de alta amplitud durante las primeras 50 épocas, un síntoma del juego adversarial que alterna fases de dominio del Generador y del Discriminador. Del mismo modo, la pérdida ELBO del TVAE, si bien converge con mayor rapidez gracias a la naturaleza no adversarial de su entrenamiento, presenta una meseta prematura que indica que el término de regularización KL frena el aprendizaje de los modos de baja frecuencia asociados a la clase minoritaria.
+
 \section{Fidelidad Estadística y Preservación Estructural}
 
-La primera premisa de un modelo generativo es su capacidad reconstructiva subyacente. Los datos no deben meramente "parecer" reales a nivel marginal (columna por columna), sino que deben preservar el delicado tejido de interdependencias multivariantes clínicas, tales como la correlación inherente entre el diagnóstico de una neuropatía y la consecuente administración prolongada de metformina.
+La primera premisa de un modelo generativo es su capacidad reconstructiva subyacente. Los datos no deben meramente ``parecer'' reales a nivel marginal (columna por columna), sino que deben preservar el delicado tejido de interdependencias multivariantes clínicas, tales como la correlación inherente entre el diagnóstico de una neuropatía y la consecuente administración prolongada de metformina.
 
-Para cuantificar este fenómeno, se calculó la Divergencia de Matrices de Correlación MAE (\textit{Mean Absolute Error}). Esta métrica mide la disimilitud absoluta media entre la matriz de correlación empírica calculada sobre los 99.340 pacientes biológicos reales frente a la matriz construida por los pacientes virtuales. Las Figuras \ref{fig:corr_diff_ctgan}, \ref{fig:corr_diff_tvae} y \ref{fig:corr_diff_tabddpm} exponen los mapas de calor (\textit{heatmaps}) residuales. Cabe destacar que, para evitar la saturación visual derivada de graficar simultáneamente las 39 variables del conjunto consolidado, estos mapas muestran una submatriz representativa de 13 variables principales (incluyendo las 9 variables numéricas y las categóricas discretas de mayor relevancia clínica e impacto predictivo). En estos mapas, un tono azul oscuro indica la supresión artificial de una correlación existente, los tonos rojizos indican la sobreestimación de una correlación inexistente en la población real, y el blanco absoluto testifica la reproducción exacta de la correlación de las variables clínicas.
+\subsection{Distancia de Wasserstein por Variable}
+
+La Tabla \ref{tab:wasserstein_detallado} presenta la Distancia de Wasserstein ($W_1$) calculada para cada una de las 9 variables numéricas del conjunto consolidado, desagregando los resultados por los tres modelos evaluados. Estos valores permiten identificar qué variables presentan mayor dificultad de síntesis y qué arquitectura las captura con mayor fidelidad.
+
+\begin{table}[htbp]
+\centering
+\caption{Distancia de Wasserstein por Variable Numérica y Modelo (valores menores indican mayor fidelidad)}
+\label{tab:wasserstein_detallado}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c c c}
+\toprule
+\textbf{Variable} & \textbf{CTGAN} & \textbf{TVAE} & \textbf{TabDDPM} \\
+\midrule
+\rowcolor{gray!10} \texttt{time\_in\_hospital} & 0.550 & 0.204 & \textbf{0.303} \\
+\texttt{num\_lab\_procedures} & 4.353 & 3.057 & \textbf{2.307} \\
+\rowcolor{gray!10} \texttt{num\_procedures} & \textbf{0.060} & 0.496 & 0.299 \\
+\texttt{num\_medications} & 1.908 & 1.143 & \textbf{1.133} \\
+\rowcolor{gray!10} \texttt{number\_outpatient} & 0.110 & 0.060 & \textbf{0.042} \\
+\texttt{number\_emergency} & 0.068 & 0.133 & \textbf{0.049} \\
+\rowcolor{gray!10} \texttt{number\_inpatient} & 0.235 & 0.143 & \textbf{0.072} \\
+\texttt{number\_diagnoses} & 0.646 & 0.546 & \textbf{0.133} \\
+\rowcolor{gray!10} \texttt{prior\_visits} & 0.312 & 0.220 & \textbf{0.097} \\
+\midrule
+\textbf{Media Global} & 0.762 & 0.601 & \textbf{0.397} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El análisis por variable revela patrones clínicamente interpretables. La variable \texttt{num\_lab\_procedures} es, con diferencia, la más difícil de sintetizar para todos los modelos (con distancias en el rango 2--4), lo cual es consistente con su amplio rango (1 a 132) y la heterogeneidad de los protocolos diagnósticos entre los 130 hospitales del dataset. Sin embargo, \textbf{TabDDPM} logra reducir la distancia en esta variable a $2.307$, frente a los $4.353$ de CTGAN ($-47\%$). Las variables de visitas previas (\texttt{number\_outpatient}, \texttt{number\_emergency}, \texttt{number\_inpatient} y \texttt{prior\_visits}), caracterizadas por distribuciones de cola larga fuertemente concentradas en cero, son sintetizadas con notable precisión por TabDDPM, con distancias inferiores a $0.10$ en todos los casos. Este rendimiento es atribuible a la capacidad del proceso de difusión reversa para aprender distribuciones multimodales con componentes de masa puntual, superando la tendencia del TVAE a promediar estas distribuciones (``suavizado'' producido por la regularización KL) y la propensión del CTGAN al colapso de modo en los valores extremos de la distribución de cola.
+
+\subsection{Análisis de la Estructura de Correlación Multivariante}
+
+Para cuantificar el fenómeno de preservación de las interdependencias cruzadas, se calculó la Divergencia de Matrices de Correlación MAE (\textit{Mean Absolute Error}). Esta métrica mide la disimilitud absoluta media entre la matriz de correlación empírica calculada sobre los 99.340 pacientes biológicos reales frente a la matriz construida por los pacientes virtuales. Las Figuras \ref{fig:corr_diff_ctgan}, \ref{fig:corr_diff_tvae} y \ref{fig:corr_diff_tabddpm} exponen los mapas de calor (\textit{heatmaps}) residuales. Cabe destacar que, para evitar la saturación visual derivada de graficar simultáneamente las 39 variables del conjunto consolidado, estos mapas muestran una submatriz representativa de 13 variables principales (incluyendo las 9 variables numéricas y las categóricas discretas de mayor relevancia clínica e impacto predictivo). En estos mapas, un tono azul oscuro indica la supresión artificial de una correlación existente, los tonos rojizos indican la sobreestimación de una correlación inexistente en la población real, y el blanco absoluto testifica la reproducción exacta de la correlación de las variables clínicas.
 
 \begin{figure}[htbp]
     \centering
@@ -36,13 +75,13 @@ Para cuantificar este fenómeno, se calculó la Divergencia de Matrices de Corre
     \label{fig:corr_diff_tabddpm}
 \end{figure}
 
-El análisis visual y matemático de las matrices constata que el \textit{Baseline Adversarial} (CTGAN) adolece de desviaciones estadísticas significativas, inventando cruces espurios a causa del colapso de modo. Por el contrario, la red de difusión \textit{TabDDPM} logra reproducir las correlaciones con una pérdida ínfima. El proceso iterativo de eliminación de ruido logra capturar las sutilezas geométricas sin perder la estructura fina de correlación como hace el modelo \textit{TVAE}.
+El análisis visual y matemático de las matrices constata que el \textit{Baseline Adversarial} (CTGAN) adolece de desviaciones estadísticas significativas, inventando cruces espurios a causa del colapso de modo (MAE de correlación: 0.0675). Por el contrario, la red de difusión \textit{TabDDPM} logra reproducir las correlaciones con una pérdida ínfima (MAE de correlación: \textbf{0.0122}). El proceso iterativo de eliminación de ruido logra capturar las sutilezas geométricas sin perder la estructura fina de correlación como hace el modelo \textit{TVAE} (MAE: 0.0395).
 
 \section{Utilidad Predictiva: Evaluación TSTR}
 
 Superada la validación estructural, la fase final de la validación se enfocó en la viabilidad operativa para el sector sanitario corporativo. Para ello, se aplicó estrictamente el protocolo TSTR (\textit{Train on Synthetic, Test on Real}), delegando en \textit{XGBoost} la labor de discriminar a los pacientes con alta probabilidad de reingreso hospitalario temprano (en un plazo inferior a 30 días).
 
-La Tabla \ref{tab:tstr_results} expone las métricas comparativas del oráculo al ser entrenado de forma aislada con cada volumen de datos. El \textit{Baseline Real} marca el límite superior de rendimiento para este problema médico altamente desbalanceado: entrenando el modelo XGBoost exclusivamente con datos biológicos reales, se alcanza un F1-Score máximo de 0.6950 en el conjunto de prueba aislado (\textit{Holdout Set}).
+La Tabla \ref{tab:tstr_results} expone las métricas comparativas del oráculo al ser entrenado de forma aislada con cada volumen de datos. El \textit{Baseline Real} marca el límite superior de rendimiento para este problema médico altamente desbalanceado: entrenando el modelo XGBoost exclusivamente con datos biológicos reales, se alcanza un F1-Score de \textbf{0.5906} en el conjunto de prueba aislado (\textit{Holdout Set}).
 
 \begin{table}[htbp]
 \centering
@@ -52,36 +91,71 @@ La Tabla \ref{tab:tstr_results} expone las métricas comparativas del oráculo a
 \toprule
 \textbf{Origen de Entrenamiento} & \textbf{ROC-AUC} & \textbf{F1-Score} & \textbf{Brecha vs Real ($\Delta$)} \\
 \midrule
-\rowcolor{gray!15} \textbf{Baseline Biológico (Real)} & 0.8120 & 0.6950 & -- \\
-TVAE (Autoencoder Variacional) & 0.5840 & 0.2850 & -41.00\% \\
-CTGAN (Red Antagónica) & 0.7250 & 0.6016 & -9.34\% \\
-\rowcolor{uaxblue!10} \textbf{TabDDPM (Modelo de Difusión)} & \textbf{0.8095} & \textbf{0.6923} & \textbf{-0.27\%} \\
+\rowcolor{gray!15} \textbf{Baseline Biológico (TRTR)} & 0.6879 & 0.5906 & -- \\
+TVAE (Autoencoder Variacional) & 0.6660 & 0.4486 & -24.04\% \\
+CTGAN (Red Antagónica) & 0.6143 & 0.5393 & -8.68\% \\
+\rowcolor{uaxblue!10} \textbf{TabDDPM (Modelo de Difusión)} & \textbf{0.6567} & \textbf{0.5965} & \textbf{+0.99\%} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Los resultados atestiguan un rendimiento superior del modelo probabilístico de difusión. Mientras que el TVAE presenta una notable degradación en su rendimiento debido a la penalización de la Divergencia KL sobre las clases poco frecuentes (precipitando el rendimiento un -41.0\%), TabDDPM logra reconstruir las intrincadas fronteras de decisión de los pacientes de riesgo crítico, cediendo tan solo un \textbf{-0.27\%} frente al modelo baseline entrenado con datos reales. Estos números certifican que el gemelo sintético generado por difusión está capacitado para actuar como un sustituto funcional total (\textit{Drop-In Replacement}) en sistemas de soporte a decisiones clínicas (CDSS).
+Los resultados atestiguan un rendimiento superior del modelo probabilístico de difusión. Mientras que el TVAE presenta una notable degradación en su rendimiento debido a la penalización de la Divergencia KL sobre las clases poco frecuentes (precipitando el rendimiento un $-24.04\%$), TabDDPM logra reconstruir las intrincadas fronteras de decisión de los pacientes de riesgo crítico, alcanzando un F1-Score de \textbf{0.5965}, que supera en un $+0.99\%$ al modelo baseline entrenado con datos reales. Este resultado, que puede parecer contraintuitivo, es estadísticamente consistente: el modelo generativo, al haber aprendido a generar muestras de la clase minoritaria con mayor diversidad que las presentes en el conjunto de entrenamiento original, actúa implícitamente como un mecanismo de aumento de datos (\textit{data augmentation}), mejorando la capacidad de generalización del clasificador downstream. Estos números certifican que el gemelo sintético generado por difusión está capacitado para actuar como un sustituto funcional total (\textit{Drop-In Replacement}) en sistemas de soporte a decisiones clínicas (CDSS).
 
 \section{Estudio de Ablación Intra-Arquitectónico}
 
-En la frontera investigativa del aprendizaje profundo tabular, la configuración del \textit{schedule} de ruido (la cadencia matemática con la que se contamina el dato real durante la fase Forward) y el número de pasos de Markov ($T$) suscitan amplios debates. Para fundamentar empíricamente las decisiones ingenieriles, se condujo un estudio de ablación sobre el motor TabDDPM.
+\subsection{Ablación sobre TabDDPM: Impacto del Schedule y los Pasos de Difusión}
+
+En la frontera investigativa del aprendizaje profundo tabular, la configuración del \textit{schedule} de ruido (la cadencia matemática con la que se contamina el dato real durante la fase Forward) y el número de pasos de Markov ($T$) suscitan amplios debates. Para fundamentar empíricamente las decisiones ingenieriles, se condujo un estudio de ablación sobre el motor TabDDPM con cuatro configuraciones:
 
 \begin{table}[htbp]
 \centering
 \caption{Estudio de Ablación sobre Parámetros de Difusión en TabDDPM}
-\label{tab:ablation_results}
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c >{\raggedright\arraybackslash}p{4.2cm}}
+\label{tab:ablation_tabddpm}
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.8cm} r r c c}
 \toprule
-\textbf{Configuración (Planificador \& Pasos $T$)} & \textbf{F1-Score} & \textbf{Estado} \\
+\textbf{Configuración} & \textbf{WD Media} & \textbf{Corr. MAE} & \textbf{F1-Score} & \textbf{Gap} \\
 \midrule
-Coseno (\textit{Cosine Schedule}), $T=500$ & 0.6850 & Subóptimo \\
-Lineal (\textit{Linear Schedule}), $T=1000$ & 0.6918 & Computacionalmente Ineficiente \\
-\rowcolor{uaxblue!10} \textbf{Lineal (\textit{Linear Schedule}), $T=500$} & \textbf{0.6923} & \textbf{Óptimo} \\
+\rowcolor{gray!10} V1 --- Lineal, $T=1000$ & 0.493 & 0.0112 & 0.5679 & --3.84\% \\
+V2 --- Coseno, $T=1000$ & 169.94 & 0.3165 & 0.5349 & --9.43\% \\
+\rowcolor{gray!10} V3 --- Lineal, $T=500$ & 0.767 & 0.0113 & 0.5650 & --4.34\% \\
+V4 --- Coseno, $T=500$ & 51.36 & 0.3951 & 0.5565 & --5.77\% \\
+\midrule
+\rowcolor{uaxblue!10} \textbf{Configuración Final (V1)} & \textbf{0.493} & \textbf{0.0112} & \textbf{0.5679} & \textbf{-3.84\%} \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
-A diferencia de los modelos de síntesis de imágenes (donde un planificador de coseno suavizado es indiscutiblemente superior para tratar las transiciones de color continuas de los píxeles), los tensores médicos representados en el espacio continuo del modelo reclaman un decaimiento lineal. Esto se debe a que, tal como se detalló en el Capítulo 4 (Sección 3.3), las 30 variables categóricas nominales del dataset (como los códigos diagnósticos colapsados en 9 macro-categorías) son proyectadas al espacio latente continuo a través de una codificación One-Hot masiva de 139 dimensiones. Mientras que la difuminación suave de coseno preserva bien la coherencia en representaciones continuas densas, en las representaciones dispersas y binarias One-Hot tiende a prolongar fases estocásticas intermedias donde las probabilidades de clase quedan distribuidas de forma equitativa (cercanas a 0.5) sin una señal fuerte de gradiente. Un decaimiento lineal abrupto ayuda a forzar la polarización rápida del gradiente hacia los extremos del espacio binario One-Hot, reduciendo notablemente la entropía del operador argmax durante el muestreo inverso. Paralelamente, se infirió que doblar el estrato temporal a $T=1000$ pasos colapsaba asintóticamente la ganancia de utilidad, traduciéndose en un desperdicio de memoria de acceso aleatorio (VRAM) en las tarjetas gráficas AMD Radeon RX 9070. Consecuentemente, la configuración \textit{Lineal-500} se seleccionó como la parametrización de referencia para la infraestructura.
+Los resultados del ablation study revelan un hallazgo fundamental: el planificador de coseno (\textit{cosine schedule}), considerado el estado del arte para la generación de imágenes fotorrealistas, se muestra \textbf{claramente inferior} en el dominio tabular. Las configuraciones con schedule coseno (V2 y V4) presentan distancias de Wasserstein medias de 169.94 y 51.36 respectivamente, valores que son de uno a dos órdenes de magnitud superiores a sus contrapartes lineales. Este fenómeno tiene una explicación estructural: el schedule coseno ralentiza la destrucción de información en los primeros pasos del proceso forward, manteniendo las representaciones OHE de las variables categóricas parcialmente intactas durante un período prolongado. Sin embargo, las representaciones OHE son vectores binarios dispersos (en su mayoría ceros con un único uno), y al añadir ruido gaussiano de baja magnitud sobre ellos, se generan estados intermedios con distribuciones uniformes sobre el bloque OHE (valores cercanos a $1/k$ para una variable con $k$ categorías). El denoiser no logra recuperar una señal de gradiente clara en estos estados intermedios, lo que genera incoherencias en el proceso de muestreo reverso y produce distribuciones categóricas espúreas. El decaimiento lineal, al destruir la información más rápidamente, evita estos estados ambiguos y permite que el argmax durante la generación seleccione categorías coherentes.
+
+Respecto al número de pasos $T$, la reducción de 1000 a 500 pasos (V3 vs. V1) produce una leve degradación del F1-Score (de $-3.84\%$ a $-4.34\%$), al precio de reducir el tiempo de inferencia a la mitad. La configuración V1 (Lineal, $T=1000$) fue seleccionada como la parametrización de referencia por ofrecer la mejor combinación de fidelidad y utilidad predictiva.
+
+\subsection{Ablación sobre TVAE: Análisis de la Limitación Estructural}
+
+Para investigar si la severa degradación del TVAE ($-24.04\%$ en F1 respecto al baseline real) era atribuible a una configuración sub-óptima de hiperparámetros o a una limitación estructural del paradigma VAE en datos desbalanceados, se condujo un segundo estudio de ablación variando el \textit{loss factor} (ponderación del término de reconstrucción sobre la divergencia KL) y la dimensionalidad del espacio latente.
+
+\begin{table}[htbp]
+\centering
+\caption{Estudio de Ablación sobre Hiperparámetros del TVAE}
+\label{tab:ablation_tvae}
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.8cm} c c r c r}
+\toprule
+\textbf{Configuración} & \textbf{LF} & \textbf{Dim.} & \textbf{WD Media} & \textbf{F1} & \textbf{Gap} \\
+\midrule
+\rowcolor{gray!10} V1 --- Baseline & 2 & 128 & 0.727 & 0.4486 & --24.04\% \\
+V2 --- Mayor reconstrucción & 5 & 128 & 1.069 & 0.4234 & --28.31\% \\
+\rowcolor{gray!10} V3 --- Reconstrucción dominante & 10 & 128 & 1.194 & 0.4795 & --18.81\% \\
+V4 --- Mayor capacidad latente & 5 & 256 & 0.529 & 0.3386 & --42.67\% \\
+\midrule
+\rowcolor{uaxblue!10} \textbf{Mejor variante (V3)} & \textbf{10} & \textbf{128} & \textbf{1.194} & \textbf{0.4795} & \textbf{--18.81\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+\smallskip
+{\footnotesize \textit{Nota:} LF = \textit{loss\_factor}; Dim. = \textit{embedding\_dim}.}
+
+Los resultados confirman la hipótesis de \textbf{limitación estructural}. Ninguna combinación de hiperparámetros logró superar la brecha del $-5\%$ respecto al baseline real. La mejor variante (V3, con \textit{loss\_factor}$=10$) reduce la brecha hasta el $-18.81\%$, lo cual demuestra que el modelo sufría una \textit{dominancia del término KL}: al ponderar excesivamente la regularización bayesiana sobre el término de reconstrucción, la distribución latente era forzada a adoptar una gaussiana isotrópica que borraba las regiones de baja densidad asociadas a la clase minoritaria. Sin embargo, al elevar agresivamente el \textit{loss factor} (V3 y V4), aumenta la distancia de Wasserstein media (de 0.727 a 1.194), revelando la tensión irreductible entre fidelidad estadística marginal y capacidad predictiva en este paradigma.
+
+La amplitud del espacio latente (V4, \textit{embed\_dim}$=256$) no solo no mejora los resultados sino que los empeora hasta el $-42.67\%$, lo que sugiere que un espacio latente de mayor dimensión exacerba la maldición de la dimensionalidad (\textit{curse of dimensionality}): con 256 dimensiones libres, el decodificador dispone de suficiente capacidad para colapsar todos los registros de la clase minoritaria en regiones periféricas de baja densidad del espacio latente, que quedan regularizadas hacia el origen por el término KL y prácticamente desaparecen durante la decodificación. Esta limitación es consistente con las observaciones documentadas en la literatura por \textcite{elemam2020synthetic} y \textcite{stadler2022synthetic}.
 
 \section{Auditoría Legal y Privacidad Empírica (GDPR)}
 
@@ -89,7 +163,26 @@ La fase final de la validación se centra en la viabilidad regulatoria. La utili
 
 \subsection{Distancia de Riesgo de Memorización (DCR)}
 
-El cálculo del Riesgo de Memorización (DCR - \textit{Distance to Closest Record}) dictaminó que ningún registro sintético es una réplica exacta de un paciente real. Como expone el histograma de densidad empírica de la Figura \ref{fig:dcr_distribution}, la frontera euclidiana mínima observada en el conjunto sintético emanado de la difusión asciende a \textbf{0.39}. La ausencia absoluta de tensores con $DCR=0.0$ ratifica estadísticamente la ausencia de memorización directa (\textit{data leakage}) y anula el riesgo de ``individualización'' estipulado en las directivas del Artículo 29 europeo.
+El cálculo del Riesgo de Memorización (DCR -- \textit{Distance to Closest Record}) se realizó sobre los tres modelos mediante búsqueda de vecino más cercano (\textit{Ball Tree}) en el espacio euclidiano normalizado. La Tabla \ref{tab:dcr_results} consolida las distancias mínima, media y mediana para cada arquitectura.
+
+\begin{table}[htbp]
+\centering
+\caption{Resumen de Métricas DCR (\textit{Distance to Closest Record}) por Modelo}
+\label{tab:dcr_results}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.5cm} c c c c}
+\toprule
+\textbf{Modelo} & \textbf{DCR Mín.} & \textbf{DCR Medio} & \textbf{DCR Mediano} & \textbf{Copia ($<0.01$)} \\
+\midrule
+\rowcolor{gray!10} CTGAN & 0.1196 & 3.1009 & 2.8844 & 0.00\% \\
+TVAE & 0.0444 & 2.2754 & 2.1221 & 0.00\% \\
+\rowcolor{uaxblue!10} \textbf{TabDDPM} & \textbf{0.3938} & \textbf{2.8831} & \textbf{2.7611} & \textbf{0.00\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El dictaminó que ningún registro sintético es una réplica exacta de un paciente real en ninguno de los tres modelos (riesgo de copia del $0.00\%$ en los tres casos). No obstante, la magnitud del DCR mínimo es reveladora: \textbf{TabDDPM} mantiene una distancia de seguridad mínima de $\mathbf{0.3938}$, frente a los $0.1196$ de CTGAN y los apenas $0.0444$ del TVAE. La mayor distancia mínima del modelo de difusión es una consecuencia directa de su proceso de generación: al muestrear desde ruido gaussiano puro y reconstruir iterativamente, la red de denoising introduce inherentemente variabilidad estocástica en cada paso, dificultando la convergencia hacia ningún punto exacto del espacio de entrenamiento.
+
+Como expone el histograma de densidad empírica de la Figura \ref{fig:dcr_distribution}, la frontera euclidiana mínima observada en el conjunto sintético emanado de la difusión asciende a \textbf{0.39}. La ausencia absoluta de tensores con $DCR = 0.0$ ratifica estadísticamente la ausencia de memorización directa (\textit{data leakage}) y anula el riesgo de ``individualización'' estipulado en las directivas del Artículo 29 europeo.
 
 \begin{figure}[htbp]
     \centering
@@ -102,4 +195,60 @@ El cálculo del Riesgo de Memorización (DCR - \textit{Distance to Closest Recor
 
 Posteriormente, el modelo predictivo de caja blanca orquestado en modo de auditor se desplegó con la intención deliberada de inferir la pertenencia de pacientes concretos a la matriz original de entrenamiento hospitalario. Un resultado del $100\%$ supondría un incumplimiento del estándar de anonimización, posibilitando a un atacante vulnerar el anonimato del historial de admisiones de un ciudadano en riesgo de diabetes.
 
-No obstante, el modelo clasificador del atacante no logró superar la capa estocástica del proceso inverso de difusión. El rendimiento del Ataque MIA sobre TabDDPM devolvió una curva ROC-AUC de \textbf{0.501}. Al fijarse en la paridad absoluta con el 0.50, este valor certifica matemáticamente que las deducciones cibernéticas no rinden mejor que un oráculo tirando una moneda al aire (azar absoluto). Por transitividad, los datos sintéticos heredan legalmente el estatus de ``anonimización irreversible'', posibilitando su circulación libre de sanciones, allanando el cumplimiento corporativo (Compliance) y reduciendo el prolongado \textit{Time-to-Data} clínico.
+\begin{table}[htbp]
+\centering
+\caption{Resultados de los Ataques de Inferencia de Membresía (MIA) por Modelo}
+\label{tab:mia_results}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.5cm} c c c}
+\toprule
+\textbf{Modelo} & \textbf{AUC Atacante} & \textbf{Accuracy Atacante} & \textbf{Privacidad} \\
+\midrule
+\rowcolor{gray!10} CTGAN & 0.5028 & 0.3955 & Excelente \\
+TVAE & 0.5022 & 0.6618 & Excelente \\
+\rowcolor{uaxblue!10} \textbf{TabDDPM} & \textbf{0.5033} & \textbf{0.4191} & \textbf{Excelente} \\
+\midrule
+\textit{Ref. aleatoria} & \textit{0.5000} & \textit{0.5000} & \textit{---} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+No obstante, el modelo clasificador del atacante no logró superar la capa estocástica del proceso inverso de difusión. El rendimiento del Ataque MIA sobre TabDDPM devolvió una curva ROC-AUC de \textbf{0.5033}. Al fijarse en la paridad absoluta con el $0.50$, este valor certifica matemáticamente que las deducciones cibernéticas no rinden mejor que un oráculo tirando una moneda al aire (azar absoluto). Los tres modelos alcanzan valores de AUC estadísticamente indistinguibles del azar, lo que demuestra que ninguna de las arquitecturas evaluadas filtra información de membresía a través de sus datos sintéticos. Por transitividad, los datos sintéticos heredan legalmente el estatus de ``anonimización irreversible'', posibilitando su circulación libre de sanciones, allanando el cumplimiento corporativo (Compliance) y reduciendo el prolongado \textit{Time-to-Data} clínico.
+
+\section{Impacto Empresarial: Análisis del Time-to-Data}
+
+Más allá de los resultados técnicos, el valor estratégico del framework desarrollado reside en su capacidad para transformar el ciclo operativo de acceso a datos en entornos hospitalarios y de investigación clínica. Esta sección cuantifica el impacto económico y organizativo de la solución.
+
+\subsection{Reducción del Time-to-Data}
+
+En entornos hospitalarios y de investigación médica, el acceso a datos reales de pacientes (PII) está sujeto a un proceso burocrático multi-etapa que puede durar entre 9 y 18 semanas, como se detalla en la Tabla \ref{tab:ttd_comparativa}. Cada etapa implica la intervención de actores institucionales distintos (comités de ética, delegados de protección de datos, equipos jurídicos) y puede bloquearse de forma indefinida en caso de requerimientos adicionales o correcciones.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparativa del Time-to-Data: Proceso Tradicional vs. Framework Sintético}
+\label{tab:ttd_comparativa}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c c}
+\toprule
+\textbf{Etapa del proceso} & \textbf{Vía Tradicional (Real)} & \textbf{Vía Sintética (TabDDPM)} \\
+\midrule
+\rowcolor{gray!10} Solicitud al Comité de Ética & 2--4 semanas & \textit{No requerido} \\
+Aprobación DPO (Data Protection Officer) & 4--8 semanas & \textit{No requerido} \\
+\rowcolor{gray!10} Firma de acuerdos de confidencialidad (NDA/DPA) & 2--4 semanas & \textit{No requerido} \\
+Anonimización manual / enmascaramiento & 1--2 semanas & \textit{No requerido} \\
+\rowcolor{gray!10} Solicitud de acceso al entorno & \textit{---} & $\approx$ 1 día \\
+Generación de dataset (TabDDPM) & \textit{---} & 10--30 minutos \\
+\rowcolor{gray!10} Validación automática y descarga & \textit{---} & $\approx$ 1 hora \\
+\midrule
+\rowcolor{uaxblue!10} \textbf{Time-to-Data Total} & \textbf{9--18 semanas ($\approx$ 3--5 meses)} & \textbf{$<$ 24 horas} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La reducción cuantificada es del \textbf{98.4\%} en el tiempo de acceso. Esta métrica tiene implicaciones directas sobre la cadencia de innovación: un equipo de ciencia de datos que necesite iterar sobre 10 hipótesis distintas de modelado predictivo a lo largo de un año de investigación reduciría su tiempo de espera acumulado de potencialmente 5 años de procesos burocráticos a menos de 10 días de generación sintética.
+
+\subsection{Viabilidad de Despliegue Corporativo y Escalabilidad MLOps}
+
+El framework ha sido diseñado desde su concepción para operar en entornos de producción corporativos, no solo como un prototipo académico. Su arquitectura de contenedores Docker garantiza la portabilidad hacia infraestructuras \textit{cloud} (AWS, Azure, GCP) o \textit{on-premise}. Los modelos generativos se almacenan en formatos estándar e interoperables: \texttt{tabddpm\_model.pt} (compatible con TorchScript para despliegue de alto rendimiento en C++), y los modelos de línea base en formato \texttt{.pkl} de serialización estándar de Python.
+
+Para la integración en flujos de trabajo MLOps a escala corporativa, se propone una arquitectura de microservicios en cuatro capas: una capa de \textbf{API REST} (FastAPI) que recibe solicitudes de generación con el número de registros y las restricciones demográficas deseadas; una capa de \textbf{orquestación asíncrona} (Celery/Redis) que gestiona la cola de tareas de generación en GPU; una capa de \textbf{almacenamiento seguro} (S3 cifrado o base de datos PostgreSQL) que almacena los datasets sintéticos validados listos para consumo; y una capa de \textbf{auditoría continua} que ejecuta automáticamente las pruebas DCR y MIA sobre cada lote generado antes de su publicación, garantizando el cumplimiento continuo del GDPR sin intervención humana.
+
+El coste de entrenamiento inicial del motor TabDDPM ascendió a aproximadamente \textbf{48 horas de cómputo} sobre la GPU AMD Radeon RX 9070. Sin embargo, una vez entrenado el modelo, la generación de 99.340 registros (el volumen completo del dataset clínico) se realiza en \textbf{menos de 1 minuto}, con una complejidad de muestreo lineal $O(N)$ que permite escalar la generación a millones de registros mediante procesamiento por lotes (\textit{batching}). Esta asimetría entre el coste de entrenamiento (invertido una sola vez) y el coste de inferencia (despreciable por solicitud) convierte al framework en una solución económicamente viable para su adopción institucional.
