@@ -11,20 +11,20 @@ La presente sección suplementaria documenta especificaciones de bajo nivel, hip
 
 \section{Diccionario de Hiperparámetros de Entrenamiento}
 
-Para garantizar una comparativa justa y equitativa entre los diferentes paradigmas generativos (Líneas Base frente al Modelo Propuesto), todos los algoritmos fueron sometidos al mismo número de iteraciones de descenso de gradiente (épocas) y al mismo volumen de muestras simultáneas (\textit{Batch Size}), delegando la divergencia de rendimiento exclusivamente a sus arquitecturas intrínsecas.
+Para garantizar una evaluación rigurosa y adaptada a la naturaleza de cada paradigma generativo, las líneas base (CTGAN y TVAE) fueron entrenadas utilizando hiperparámetros estandarizados de la literatura, mientras que el modelo propuesto (TabDDPM) se parametrizó bajo su régimen óptimo de convergencia, adaptado a la dinámica del proceso inverso de difusión de Markov.
 
 \begin{table}[htbp]
 \centering
 \caption{Repertorio de Hiperparámetros Arquitectónicos}
 \label{tab:hyperparameters}
-\begin{tabular}{l p{7cm} c}
+\begin{tabular}{l p{7.5cm} c}
 \toprule
 \textbf{Modelo} & \textbf{Parámetro Físico} & \textbf{Valor Instanciado} \\
 \midrule
-\rowcolor{gray!15} \textbf{Global} & Épocas de Entrenamiento (\textit{Epochs}) & 300 \\
-\textbf{Global} & Tamaño del Lote (\textit{Batch Size}) & 500 \\
-\rowcolor{gray!15} \textbf{Global} & Optimizador de Gradiente & AdamW \\
-\textbf{Global} & Tasa de Aprendizaje (\textit{Learning Rate}) & $2 \times 10^{-4}$ \\
+\rowcolor{gray!15} \textbf{Global (Baselines)} & Épocas de Entrenamiento (\textit{Epochs}) & 300 \\
+\textbf{Global (Baselines)} & Tamaño del Lote (\textit{Batch Size}) & 500 \\
+\rowcolor{gray!15} \textbf{Global (Baselines)} & Optimizador de Gradiente & Adam \\
+\textbf{Global (Baselines)} & Tasa de Aprendizaje (\textit{Learning Rate}) & $2 \times 10^{-4}$ \\
 \midrule
 \rowcolor{uaxblue!10} \textbf{CTGAN} & Dimensión del Ruido Latente & 128 \\
 \textbf{CTGAN} & Dimensiones del Generador MLP & (256, 256) \\
@@ -34,9 +34,13 @@ Para garantizar una comparativa justa y equitativa entre los diferentes paradigm
 \textbf{TVAE} & Dimensiones del Encoder & (128, 128) \\
 \rowcolor{gray!15} \textbf{TVAE} & Dimensiones del Decoder & (128, 128) \\
 \midrule
-\rowcolor{uaxblue!10} \textbf{TabDDPM} & Pasos de Difusión ($T$) & 500 \\
+\rowcolor{uaxblue!10} \textbf{TabDDPM} & Pasos de Difusión ($T$) & 1000 \\
 \textbf{TabDDPM} & Estrategia del Ruido (\textit{Noise Schedule}) & Lineal \\
-\rowcolor{uaxblue!10} \textbf{TabDDPM} & Dimensiones de la Red Denoising (MLP) & (256, 512, 1024, 512, 256) \\
+\rowcolor{uaxblue!10} \textbf{TabDDPM} & Arquitectura de la Red Denoising (MLP) & 3 ResBlocks (512 c/u) \\
+\textbf{TabDDPM} & Épocas de Entrenamiento (\textit{Epochs}) & 1000 \\
+\rowcolor{uaxblue!10} \textbf{TabDDPM} & Tamaño del Lote (\textit{Batch Size}) & 4096 \\
+\textbf{TabDDPM} & Tasa de Aprendizaje (\textit{Learning Rate}) & $1 \times 10^{-3}$ \\
+\rowcolor{uaxblue!10} \textbf{TabDDPM} & Decaimiento de Pesos (\textit{Weight Decay}) & $1 \times 10^{-4}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -47,36 +51,75 @@ El ecosistema de modelado se desarrolló empleando Python 3.10. A continuación,
 
 \subsection{Instanciación y Entrenamiento de TabDDPM}
 
-El siguiente bloque demuestra la instanciación de la arquitectura de difusión mediante los \textit{wrappers} de la librería SDV, adaptando los preprocesamientos continuos a la naturaleza híbrida de los datos médicos.
+El siguiente bloque demuestra la instanciación de la arquitectura de difusión de desarrollo propio en PyTorch, detallando el preprocesamiento mixto de variables y la topología de la red de eliminación de ruido (\textit{DenoisingMLP}) con sus bloques residuales y embeddings temporales.
 
 \begin{verbatim}
 import torch
-from sdv.single_table import TabDDPMSynthesizer
-# Nota: La implementación customizada de TabDDPM hereda de los 
-# principios de PyTorch y es acoplada al pipeline de SDV para compatibilidad.
+import torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader
 
-# 1. Definición del Hardware (GPU AMD / CUDA-Compatible)
+# 1. Definición del Hardware (GPU / CUDA-Compatible)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Desplegando entrenamiento en: {device}")
 
-# 2. Configuración de la red Difusora (TabDDPM Custom)
+# 2. Configuración de Hiperparámetros de Referencia (V1)
 tabddpm_config = {
-    'epochs': 300,
-    'batch_size': 500,
-    'diffusion_steps': 500,
-    'noise_schedule': 'linear',
-    'mlp_dimensions': [256, 512, 1024, 512, 256],
-    'learning_rate': 2e-4
+    'epochs': 1000,
+    'batch_size': 4096,
+    'T': 1000,                     # Pasos de difusión
+    'noise_schedule': 'linear',    # Cadena lineal de betas
+    'hidden_dims': [512, 512, 512],# Capas de los ResBlocks
+    'lr': 1e-3,
+    'weight_decay': 1e-4
 }
 
-# 3. Ingesta del tensor de pacientes y ajuste (Proceso Forward + Denoising)
-# model.fit(real_data) ejecuta la Cadena de Markov y optimiza el MLP
-model = TabDDPMSynthesizer(metadata=diabetes_metadata, **tabddpm_config)
-model.fit(real_patient_dataframe)
+# 3. Inicialización del Preprocesador Tabular y Codificación Mixta
+# (Convierte las 9 continuas vía StandardScaler y las 30 categóricas vía OHE a 139-dim)
+preprocessor = TabularPreprocessor(num_cols=num_cols, cat_cols=cat_cols)
+preprocessor.fit(real_patient_dataframe)
+X_scaled = preprocessor.transform(real_patient_dataframe)
 
-# 4. Inferencia (Proceso Inverso): Síntesis de Gemelos Digitales
-synthetic_twins = model.sample(num_rows=len(real_patient_dataframe))
-synthetic_twins.to_csv("tabddpm_diabetes_synthetic.csv", index=False)
+# 4. Creación del Loader del Dataset
+dataset = TensorDataset(torch.FloatTensor(X_scaled))
+loader = DataLoader(dataset, batch_size=tabddpm_config['batch_size'], shuffle=True)
+
+# 5. Instanciación de la Red de Denoising (1.097.483 parámetros entrenables)
+denoiser = DenoisingMLP(
+    input_dim=preprocessor.input_dim,          # 139 dimensiones
+    hidden_dims=tabddpm_config['hidden_dims'],  # [512, 512, 512] con ResBlocks
+    dropout=0.0
+).to(device)
+
+# 6. Definición de Pérdida (MSE) y Optimizadores
+optimizer = torch.optim.AdamW(
+    denoiser.parameters(), 
+    lr=tabddpm_config['lr'], 
+    weight_decay=tabddpm_config['weight_decay']
+)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    optimizer, 
+    T_max=tabddpm_config['epochs']
+)
+
+# 7. Ejecución del Entrenamiento (Difusión de Markov con T=1000 pasos de ruido)
+for epoch in range(tabddpm_config['epochs']):
+    denoiser.train()
+    for batch in loader:
+        x_0 = batch[0].to(device)
+        t = torch.randint(0, tabddpm_config['T'], (x_0.shape[0],), device=device)
+        noise = torch.randn_like(x_0)
+        
+        # Proceso Forward de Difusión
+        x_t = schedule.q_sample(x_0, t, noise)
+        
+        # Predicción del Ruido vía DenoisingMLP
+        predicted_noise = denoiser(x_t, t)
+        loss = nn.functional.mse_loss(predicted_noise, noise)
+        
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+    scheduler.step()
 \end{verbatim}
 
 \subsection{Auditoría de Memorización: Distancia al Vecino más Cercano (DCR)}
