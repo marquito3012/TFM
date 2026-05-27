@@ -57,6 +57,13 @@ $$ \min_G \max_D V(D, G) = \mathbf{E}_{x \sim p_{data}(x)}[\log D(x)] + \mathbf{
 
 A medida que el entrenamiento avanza, el Generador se ve forzado a producir falsificaciones cada vez más indetectables, obligando al Discriminador a refinar sus heurísticas de detección. En el límite teórico, el Generador domina la distribución real y el Discriminador es incapaz de decidir (D=0.5).
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{GANs.png}
+    \caption{Arquitectura general y flujo adversarial de una red GAN \parencite{gan_architecture_fig}.}
+    \label{fig:gan_architecture}
+\end{figure}
+
 En el ámbito de los datos tabulares, las GANs han sido adaptadas prolíficamente. Arquitecturas como CTGAN (\textit{Conditional Tabular GAN}) \parencite{xu2019ctgan} incorporaron generadores condicionales y preprocesamientos de Modo-Específico (VGM) para lidiar con variables categóricas, mientras que propuestas más recientes como CTAB-GAN \parencite{zhao2021ctabgan} añadieron redes convolucionales al flujo. No obstante, las GANs adolecen estructuralmente de dos limitaciones estructurales: la inestabilidad del entrenamiento (desvanecimiento del gradiente) y el fenómeno del "colapso de modo" (\textit{mode collapse}), un fenómeno por el cual el Generador descubre un único conjunto de registros sintéticos repetitivos y lo repite iterativamente, omitiendo la diversidad y las clases minoritarias del dataset real.
 
 \subsection{Autoencoders Variacionales (VAEs)}
@@ -68,6 +75,13 @@ $$ \mathcal{L}_{VAE} = -\mathbf{E}_{q_\phi(z|x)}[\log p_\theta(x|z)] + D_{KL}(q_
 El primer término actúa como una pérdida de reconstrucción clásica (fomentando copias precisas del paciente real), mientras que el segundo término es la Divergencia de Kullback-Leibler ($D_{KL}$), que actúa como un regularizador matemático forzando a las distribuciones latentes de los pacientes a asemejarse a una distribución normal estándar.
 
 Esta tensión teórica (forzar a los datos reales a encajar en una única distribución continua regularizada) es, simultáneamente, la principal fortaleza y la mayor limitación de los VAEs en el dominio tabular. Mientras que en imágenes (rostros, objetos) la transición entre píxeles es continua, en los datos tabulares clínicos existe un desbalanceo agudo y una frontera discreta severa entre los pacientes sanos (clase mayoritaria) y los enfermos críticos (clase minoritaria). Al comprimir ambas realidades en un espacio latente unificado fuertemente regularizado, las redes VAE tienden a desdibujar o suavizar las fronteras de decisión de las minorías, degradando su rendimiento predictivo en métricas como el F1-Score.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{VAEs.png}
+    \caption{Estructura general y regularización del espacio latente en un Autoencoder Variacional (VAE) \parencite{vae_architecture_medium}.}
+    \label{fig:vae_architecture}
+\end{figure}
 
 \section{Modelos Probabilísticos de Difusión (Denoising Diffusion)}
 
@@ -85,11 +99,18 @@ El corazón de la Inteligencia Artificial radica en aprender a ejecutar el Proce
 $$ p_\theta(x_{t-1} | x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t)) $$
 La red neuronal, referida como el \textit{Denoiser}, se entrena empleando el Error Cuadrático Medio clásico frente al ruido real inyectado. Como demostró \textcite{nichol2021improved}, el rendimiento óptimo se alcanza al optimizar el planificador del ruido (\textit{schedule} coseno), y parametrizar la red de manera que reciba el paso temporal $t$ como una integración de codificación posicional (Timestep Embedding), permitiendo que la red sepa exactamente en qué estadio de degradación se encuentra la muestra.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TABB.png}
+    \caption{Procesos directo (Forward) de adición de ruido y reverso (Backward/Denoising) en modelos de difusión probabilísticos \parencite{diffusion_process_fig}.}
+    \label{fig:diffusion_architecture}
+\end{figure}
+
 \subsection{Adaptación al Dominio Tabular: El Framework TabDDPM}
 
 Históricamente, los DDPM se popularizaron de forma abrumadora en el procesamiento de imágenes, al ser respaldados internamente por arquitecturas U-Net. Sin embargo, en un desarrollo metodológico reciente, \textcite{kotelnikov2023tabddpm} publicaron TabDDPM, el primer acercamiento serio para adaptar el modelado probabilístico de la difusión a las complejas estructuras tabulares.
 
-Dado que la difusión es un proceso estocástico que opera asumiendo espacios euclidianos y ruido gaussiano continuo, el desafío radica en el tratamiento de variables enteras (edades) y categóricas (códigos diagnósticos, razas, géneros). TabDDPM soluciona esto mediante un preprocesamiento continuo masivo: los valores numéricos son estandarizados mediante varianzas unitarias, y las variables categóricas son transmutadas a vectores difusos mediante el uso de la codificación densa iterativa (\textit{One-Hot Encoding}). Esta vasta matriz de variables mixtas es procesada por una red \textit{Multi-Layer Perceptron} (MLP) con alta capacidad con conexiones residuales similares a las arquitecturas \textit{Attention} de \textcite{vaswani2017attention}, logrando preservar las interdependencias evitando la degradación que experimentan las redes convolucionales al carecer el texto tabular de vecindad espacial.
+Dado que la difusión es un proceso estocástico que opera asumiendo espacios euclidianos y ruido gaussiano continuo, el desafío radica en el tratamiento de variables numéricas continuas/discretas y categóricas (códigos diagnósticos, razas, géneros). TabDDPM soluciona esto mediante un preprocesamiento continuo masivo: los valores numéricos son estandarizados mediante varianzas unitarias, y las variables categóricas son transmutadas a vectores difusos mediante el uso de la codificación densa iterativa (\textit{One-Hot Encoding}). Esta vasta matriz de variables mixtas es procesada por una red \textit{Multi-Layer Perceptron} (MLP) con alta capacidad con conexiones residuales similares a las arquitecturas \textit{Attention} de \textcite{vaswani2017attention}, logrando preservar las interdependencias evitando la degradación que experimentan las redes convolucionales al carecer el texto tabular de vecindad espacial.
 
 \section{Protocolos de Evaluación en Datos Tabulares Sintéticos}
 

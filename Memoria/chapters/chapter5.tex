@@ -13,12 +13,12 @@ Los resultados se estructuran en tres dimensiones analíticas fundamentales: en 
 
 La primera premisa de un modelo generativo es su capacidad reconstructiva subyacente. Los datos no deben meramente "parecer" reales a nivel marginal (columna por columna), sino que deben preservar el delicado tejido de interdependencias multivariantes clínicas, tales como la correlación inherente entre el diagnóstico de una neuropatía y la consecuente administración prolongada de metformina.
 
-Para cuantificar este fenómeno, se calculó la Divergencia de Matrices de Correlación MAE (\textit{Mean Absolute Error}). Esta métrica mide la disimilitud absoluta media entre la matriz de correlación empírica calculada sobre los 99.340 pacientes biológicos reales frente a la matriz construida por los pacientes virtuales. Las Figuras \ref{fig:corr_diff_ctgan}, \ref{fig:corr_diff_tvae} y \ref{fig:corr_diff_tabddpm} exponen los mapas de calor (\textit{heatmaps}) residuales. En estos mapas, un tono azul oscuro indica la supresión artificial de una correlación existente, los tonos rojizos indican la sobreestimación de una correlación espuria que no existía en la vida real, y el blanco absoluto testifica la reproducción exacta de la correlación de las variables clínicas.
+Para cuantificar este fenómeno, se calculó la Divergencia de Matrices de Correlación MAE (\textit{Mean Absolute Error}). Esta métrica mide la disimilitud absoluta media entre la matriz de correlación empírica calculada sobre los 99.340 pacientes biológicos reales frente a la matriz construida por los pacientes virtuales. Las Figuras \ref{fig:corr_diff_ctgan}, \ref{fig:corr_diff_tvae} y \ref{fig:corr_diff_tabddpm} exponen los mapas de calor (\textit{heatmaps}) residuales. Cabe destacar que, para evitar la saturación visual derivada de graficar simultáneamente las 39 variables del conjunto consolidado, estos mapas muestran una submatriz representativa de 13 variables principales (incluyendo las 9 variables numéricas y las categóricas discretas de mayor relevancia clínica e impacto predictivo). En estos mapas, un tono azul oscuro indica la supresión artificial de una correlación existente, los tonos rojizos indican la sobreestimación de una correlación inexistente en la población real, y el blanco absoluto testifica la reproducción exacta de la correlación de las variables clínicas.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\textwidth]{corr_diff_ctgan.png}
-    \caption{Mapa residual de Diferencia de Correlación para CTGAN. Obsérvense las severas invenciones espurias (tonos rojos) causadas por la inestabilidad adversarial.}
+    \caption{Mapa residual de Diferencia de Correlación para CTGAN. Obsérvense las sobreestimaciones en la correlación (tonos rojos) causadas por la inestabilidad adversarial.}
     \label{fig:corr_diff_ctgan}
 \end{figure}
 
@@ -32,7 +32,7 @@ Para cuantificar este fenómeno, se calculó la Divergencia de Matrices de Corre
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\textwidth]{corr_diff_tabddpm.png}
-    \caption{Mapa residual de Diferencia de Correlación para TabDDPM. La pureza de los tonos blancos certifica una asombrosa reconstrucción de la matriz covariante original.}
+    \caption{Mapa residual de Diferencia de Correlación para TabDDPM. La prevalencia de tonos claros en la matriz de diferencia certifica una reconstrucción precisa de la estructura de covarianza original.}
     \label{fig:corr_diff_tabddpm}
 \end{figure}
 
@@ -40,27 +40,27 @@ El análisis visual y matemático de las matrices constata que el \textit{Baseli
 
 \section{Utilidad Predictiva: Evaluación TSTR}
 
-Superada la validación estructural, la investigación abordó el eje más crítico para el sector sanitario corporativo: la viabilidad operativa. Para ello, se aplicó estrictamente el protocolo TSTR (\textit{Train on Synthetic, Test on Real}), delegando en \textit{XGBoost} la labor de discriminar a los pacientes con alta probabilidad de reingreso en las Unidades de Cuidados Intensivos (UCI).
+Superada la validación estructural, la fase final de la validación se enfocó en la viabilidad operativa para el sector sanitario corporativo. Para ello, se aplicó estrictamente el protocolo TSTR (\textit{Train on Synthetic, Test on Real}), delegando en \textit{XGBoost} la labor de discriminar a los pacientes con alta probabilidad de reingreso hospitalario temprano (en un plazo inferior a 30 días).
 
-La Tabla \ref{tab:tstr_results} expone las métricas comparativas del oráculo al ser entrenado de forma aislada con cada volumen de datos. El \textit{Baseline Real} marca el techo de cristal de este problema médico altamente desbalanceado: entrenando el modelo XGBoost exclusivamente con datos biológicos reales, se alcanza un F1-Score máximo de 0.6950 en el conjunto de prueba aislado (\textit{Holdout Set}).
+La Tabla \ref{tab:tstr_results} expone las métricas comparativas del oráculo al ser entrenado de forma aislada con cada volumen de datos. El \textit{Baseline Real} marca el límite superior de rendimiento para este problema médico altamente desbalanceado: entrenando el modelo XGBoost exclusivamente con datos biológicos reales, se alcanza un F1-Score máximo de 0.6950 en el conjunto de prueba aislado (\textit{Holdout Set}).
 
 \begin{table}[htbp]
 \centering
 \caption{Resultados del Protocolo Predictivo TSTR (XGBoost Oracle)}
 \label{tab:tstr_results}
-\begin{tabular}{l c c c}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c c c}
 \toprule
 \textbf{Origen de Entrenamiento} & \textbf{ROC-AUC} & \textbf{F1-Score} & \textbf{Brecha vs Real ($\Delta$)} \\
 \midrule
 \rowcolor{gray!15} \textbf{Baseline Biológico (Real)} & 0.8120 & 0.6950 & -- \\
 TVAE (Autoencoder Variacional) & 0.5840 & 0.2850 & -41.00\% \\
 CTGAN (Red Antagónica) & 0.7250 & 0.6016 & -9.34\% \\
-\rowcolor{uaxblue!10} \textbf{TabDDPM (Difusión Progresiva)} & \textbf{0.8095} & \textbf{0.6923} & \textbf{-0.27\%} \\
+\rowcolor{uaxblue!10} \textbf{TabDDPM (Modelo de Difusión)} & \textbf{0.8095} & \textbf{0.6923} & \textbf{-0.27\%} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
-Los resultados atestiguan un rendimiento superior del modelo probabilístico de difusión. Mientras que el TVAE colapsa estrepitosamente debido a la penalización de la Divergencia KL sobre las clases poco frecuentes (precipitando el rendimiento un -41.0\%), TabDDPM logra reconstruir las intrincadas fronteras de decisión de los pacientes de riesgo crítico, cediendo tan solo un \textbf{-0.27\%} frente al modelo baseline entrenado con datos reales. Estos números certifican que el gemelo sintético generado por difusión está capacitado para actuar como un sustituto funcional total (\textit{Drop-In Replacement}) en sistemas de soporte a decisiones clínicas (CDSS).
+Los resultados atestiguan un rendimiento superior del modelo probabilístico de difusión. Mientras que el TVAE presenta una notable degradación en su rendimiento debido a la penalización de la Divergencia KL sobre las clases poco frecuentes (precipitando el rendimiento un -41.0\%), TabDDPM logra reconstruir las intrincadas fronteras de decisión de los pacientes de riesgo crítico, cediendo tan solo un \textbf{-0.27\%} frente al modelo baseline entrenado con datos reales. Estos números certifican que el gemelo sintético generado por difusión está capacitado para actuar como un sustituto funcional total (\textit{Drop-In Replacement}) en sistemas de soporte a decisiones clínicas (CDSS).
 
 \section{Estudio de Ablación Intra-Arquitectónico}
 
@@ -70,7 +70,7 @@ En la frontera investigativa del aprendizaje profundo tabular, la configuración
 \centering
 \caption{Estudio de Ablación sobre Parámetros de Difusión en TabDDPM}
 \label{tab:ablation_results}
-\begin{tabular}{l c c}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c >{\raggedright\arraybackslash}p{4.2cm}}
 \toprule
 \textbf{Configuración (Planificador \& Pasos $T$)} & \textbf{F1-Score} & \textbf{Estado} \\
 \midrule
@@ -78,14 +78,14 @@ Coseno (\textit{Cosine Schedule}), $T=500$ & 0.6850 & Subóptimo \\
 Lineal (\textit{Linear Schedule}), $T=1000$ & 0.6918 & Computacionalmente Ineficiente \\
 \rowcolor{uaxblue!10} \textbf{Lineal (\textit{Linear Schedule}), $T=500$} & \textbf{0.6923} & \textbf{Óptimo} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
-A diferencia de los modelos de síntesis de imágenes (donde un planificador de coseno suavizado es indiscutiblemente superior para tratar las transiciones de color en los píxeles), los tensores médicos con variables discretas severas reclaman un decaimiento lineal abrupto. Paralelamente, se infirió que doblar el estrato temporal a $T=1000$ pasos colapsaba asintóticamente la ganancia de utilidad, traduciéndose en un desperdicio injustificable de memoria de acceso aleatorio (VRAM) en las tarjetas gráficas AMD Radeon RX 9070. Consecuentemente, el vector \textit{Lineal-500} se consagró como la parametrización canónica para la infraestructura.
+A diferencia de los modelos de síntesis de imágenes (donde un planificador de coseno suavizado es indiscutiblemente superior para tratar las transiciones de color continuas de los píxeles), los tensores médicos representados en el espacio continuo del modelo reclaman un decaimiento lineal. Esto se debe a que, tal como se detalló en el Capítulo 4 (Sección 3.3), las 30 variables categóricas nominales del dataset (como los códigos diagnósticos colapsados en 9 macro-categorías) son proyectadas al espacio latente continuo a través de una codificación One-Hot masiva de 139 dimensiones. Mientras que la difuminación suave de coseno preserva bien la coherencia en representaciones continuas densas, en las representaciones dispersas y binarias One-Hot tiende a prolongar fases estocásticas intermedias donde las probabilidades de clase quedan distribuidas de forma equitativa (cercanas a 0.5) sin una señal fuerte de gradiente. Un decaimiento lineal abrupto ayuda a forzar la polarización rápida del gradiente hacia los extremos del espacio binario One-Hot, reduciendo notablemente la entropía del operador argmax durante el muestreo inverso. Paralelamente, se infirió que doblar el estrato temporal a $T=1000$ pasos colapsaba asintóticamente la ganancia de utilidad, traduciéndose en un desperdicio de memoria de acceso aleatorio (VRAM) en las tarjetas gráficas AMD Radeon RX 9070. Consecuentemente, la configuración \textit{Lineal-500} se seleccionó como la parametrización de referencia para la infraestructura.
 
 \section{Auditoría Legal y Privacidad Empírica (GDPR)}
 
-El colofón metodológico recae sobre la viabilidad regulatoria. La utilidad excepcional documentada carece de validez legal si los modelos operaron memorizando pacientes reales. Para despejar esta hipótesis, el repositorio sintético se enfrentó a los ciberataques programados de Privacidad Empírica.
+La fase final de la validación se centra en la viabilidad regulatoria. La utilidad excepcional documentada carece de validez legal si los modelos operaron memorizando pacientes reales. Para despejar esta hipótesis, el repositorio sintético se enfrentó a los ciberataques programados de Privacidad Empírica.
 
 \subsection{Distancia de Riesgo de Memorización (DCR)}
 

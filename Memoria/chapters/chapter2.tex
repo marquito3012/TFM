@@ -3,7 +3,7 @@
 % =============================================================================
 \chapterUnnumbered{Capítulo 2: Objetivos del TFM}
 
-El desarrollo de un proyecto de ingeniería aplicada en el dominio de la Inteligencia Artificial requiere de una planificación estructurada y una definición clara de las metas a alcanzar. La complejidad inherente a la manipulación de datos clínicos confidenciales, sumada a los rigurosos estándares técnicos requeridos por las arquitecturas de Deep Learning modernas, hace imperativa la delineación de un rumbo preciso. En este capítulo se establecen formalmente las directrices que rigen el presente Trabajo de Fin de Máster. En primer lugar, se formulará el objetivo general, el cual encapsula la misión final y el propósito principal de la investigación. A continuación, este propósito se descompondrá metodológicamente en una serie de objetivos específicos secuenciales, los cuales funcionan como hitos operativos que guiarán las fases de estudio teórico, implementación técnica, evaluación empírica y auditoría de privacidad.
+Este capítulo establece los objetivos formalmente definidos para el presente Trabajo de Fin de Máster. Se presenta el objetivo general, que sintetiza el propósito de la investigación, y se desglosa secuencialmente en los objetivos específicos que guiarán las fases de estudio teórico, diseño metodológico, implementación técnica, evaluación y auditoría de privacidad.
 
 \setcounter{section}{0}
 \section{Objetivo general}
@@ -33,7 +33,7 @@ Para garantizar la consecución sistemática y ordenada del objetivo general exp
 
   \item \textbf{Implementar y optimizar una arquitectura generativa basada en procesos de difusión probabilística para el dominio tabular.}
   
-  Este constituye el núcleo ingenieril del proyecto. El objetivo es construir computacionalmente, de manera nativa, un algoritmo capaz de destruir la información clínica mediante cadenas de Markov controladas (adición progresiva de ruido gaussiano) y, subsiguientemente, entrenar una red neuronal de \textit{Denoising} para revertir este proceso. El hito técnico consiste en lograr que este modelo converja en un espacio latente mixto (numérico y categórico), superando las limitaciones arquitectónicas tradicionales que sufren otros enfoques generativos.
+  Este constituye el núcleo ingenieril del proyecto. El objetivo es implementar de forma nativa un algoritmo capaz de destruir la información clínica mediante cadenas de Markov controladas (adición progresiva de ruido gaussiano) y, subsiguientemente, entrenar una red neuronal de \textit{Denoising} para revertir este proceso. El hito técnico consiste en lograr que este modelo converja en un espacio latente mixto (numérico y categórico), superando las limitaciones arquitectónicas tradicionales que sufren otros enfoques generativos.
 
   \item \textbf{Diseñar un protocolo de evaluación bidimensional para auditar la fidelidad estadística y la utilidad predictiva de los gemelos sintéticos.}
   
