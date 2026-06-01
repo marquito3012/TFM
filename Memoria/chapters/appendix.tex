@@ -17,7 +17,7 @@ Para garantizar una evaluación rigurosa y adaptada a la naturaleza de cada para
 \centering
 \caption{Repertorio de Hiperparámetros Arquitectónicos}
 \label{tab:hyperparameters}
-\begin{tabular}{l p{7.5cm} c}
+\begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}X c}
 \toprule
 \textbf{Modelo} & \textbf{Parámetro Físico} & \textbf{Valor Instanciado} \\
 \midrule
@@ -42,7 +42,7 @@ Para garantizar una evaluación rigurosa y adaptada a la naturaleza de cada para
 \textbf{TabDDPM} & Tasa de Aprendizaje (\textit{Learning Rate}) & $1 \times 10^{-3}$ \\
 \rowcolor{uaxblue!10} \textbf{TabDDPM} & Decaimiento de Pesos (\textit{Weight Decay}) & $1 \times 10^{-4}$ \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 \section{Extractos de Código Fuente (Python)}
@@ -53,12 +53,13 @@ El ecosistema de modelado se desarrolló empleando Python 3.10. A continuación,
 
 El siguiente bloque demuestra la instanciación de la arquitectura de difusión de desarrollo propio en PyTorch, detallando el preprocesamiento mixto de variables y la topología de la red de eliminación de ruido (\textit{DenoisingMLP}) con sus bloques residuales y embeddings temporales.
 
+{\footnotesize
 \begin{verbatim}
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
-# 1. Definición del Hardware (GPU / CUDA-Compatible)
+# 1. Definición del Hardware (GPU / Compatible con CUDA y ROCm)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Desplegando entrenamiento en: {device}")
 
@@ -68,13 +69,13 @@ tabddpm_config = {
     'batch_size': 4096,
     'T': 1000,                     # Pasos de difusión
     'noise_schedule': 'linear',    # Cadena lineal de betas
-    'hidden_dims': [512, 512, 512],# Capas de los ResBlocks
+    'hidden_dims': [512, 512, 512],# Capas de ResBlocks
     'lr': 1e-3,
     'weight_decay': 1e-4
 }
 
-# 3. Inicialización del Preprocesador Tabular y Codificación Mixta
-# (Convierte las 9 continuas vía StandardScaler y las 30 categóricas vía OHE a 139-dim)
+# 3. Inicialización de Preprocesador y Codificación Mixta
+# (Escala 9 continuas y codifica 30 categóricas a 139-dim)
 preprocessor = TabularPreprocessor(num_cols=num_cols, cat_cols=cat_cols)
 preprocessor.fit(real_patient_dataframe)
 X_scaled = preprocessor.transform(real_patient_dataframe)
@@ -83,7 +84,7 @@ X_scaled = preprocessor.transform(real_patient_dataframe)
 dataset = TensorDataset(torch.FloatTensor(X_scaled))
 loader = DataLoader(dataset, batch_size=tabddpm_config['batch_size'], shuffle=True)
 
-# 5. Instanciación de la Red de Denoising (1.097.483 parámetros entrenables)
+# 5. Instanciación de la Red de Denoising (1.097.483 parámetros)
 denoiser = DenoisingMLP(
     input_dim=preprocessor.input_dim,          # 139 dimensiones
     hidden_dims=tabddpm_config['hidden_dims'],  # [512, 512, 512] con ResBlocks
@@ -101,7 +102,7 @@ scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     T_max=tabddpm_config['epochs']
 )
 
-# 7. Ejecución del Entrenamiento (Difusión de Markov con T=1000 pasos de ruido)
+# 7. Ejecución del Entrenamiento (Difusión Markov con T=1000)
 for epoch in range(tabddpm_config['epochs']):
     denoiser.train()
     for batch in loader:
@@ -120,12 +121,13 @@ for epoch in range(tabddpm_config['epochs']):
         loss.backward()
         optimizer.step()
     scheduler.step()
-\end{verbatim}
+\end{verbatim}}
 
 \subsection{Auditoría de Memorización: Distancia al Vecino más Cercano (DCR)}
 
 Para certificar la privacidad y asegurar el cumplimiento del dictamen del Artículo 29, se implementó el siguiente algoritmo de búsqueda en árbol, calculando el DCR para detectar memorización nula.
 
+{\footnotesize
 \begin{verbatim}
 from sklearn.neighbors import NearestNeighbors
 import numpy as np
@@ -135,11 +137,11 @@ def calculate_dcr(real_data, synthetic_data):
     Calcula la Distance to Closest Record (DCR) entre los tensores 
     sintéticos y el conjunto biológico original.
     """
-    # Instanciación del árbol de búsqueda hiper-dimensional
+    # Instanciación de árbol de búsqueda hiper-dimensional
     nn_model = NearestNeighbors(n_neighbors=1, algorithm='ball_tree', p=2)
     nn_model.fit(real_data)
     
-    # Búsqueda de distancias euclidianas para cada gemelo sintético
+    # Búsqueda de distancias para cada gemelo sintético
     distances, indices = nn_model.kneighbors(synthetic_data)
     
     min_dcr = np.min(distances)
@@ -158,4 +160,4 @@ def calculate_dcr(real_data, synthetic_data):
 
 # Ejecución de la auditoría sobre la matriz estandarizada
 dcr_distances = calculate_dcr(real_tensor_scaled, synthetic_tensor_scaled)
-\end{verbatim}
+\end{verbatim}}

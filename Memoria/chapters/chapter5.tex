@@ -111,7 +111,7 @@ En la frontera investigativa del aprendizaje profundo tabular, la configuración
 \centering
 \caption{Estudio de Ablación sobre Parámetros de Difusión en TabDDPM}
 \label{tab:ablation_tabddpm}
-\begin{tabular}{>{\raggedright\arraybackslash}p{4.8cm} r r c c}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X r r c c}
 \toprule
 \textbf{Configuración} & \textbf{WD Media} & \textbf{Corr. MAE} & \textbf{F1-Score} & \textbf{Gap} \\
 \midrule
@@ -122,7 +122,7 @@ V4 --- Coseno, $T=500$ & 51.36 & 0.3951 & 0.5565 & --5.77\% \\
 \midrule
 \rowcolor{uaxblue!10} \textbf{Configuración Final (V1)} & \textbf{0.493} & \textbf{0.0112} & \textbf{0.5965} & \textbf{+1.00\%} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Los resultados del ablation study revelan un hallazgo fundamental: el planificador de coseno (\textit{cosine schedule}), considerado el estado del arte para la generación de imágenes fotorrealistas, se muestra \textbf{claramente inferior} en el dominio tabular. Las configuraciones con schedule coseno (V2 y V4) presentan distancias de Wasserstein medias de 169.94 y 51.36 respectivamente, valores que son de uno a dos órdenes de magnitud superiores a sus contrapartes lineales. Este fenómeno tiene una explicación estructural: el schedule coseno ralentiza la destrucción de información en los primeros pasos del proceso forward, manteniendo las representaciones OHE de las variables categóricas parcialmente intactas durante un período prolongado. Sin embargo, las representaciones OHE son vectores binarios dispersos (en su mayoría ceros con un único uno), y al añadir ruido gaussiano de baja magnitud sobre ellos, se generan estados intermedios con distribuciones uniformes sobre el bloque OHE (valores cercanos a $1/k$ para una variable con $k$ categorías). El denoiser no logra recuperar una señal de gradiente clara en estos estados intermedios, lo que genera incoherencias en el proceso de muestreo reverso y produce distribuciones categóricas espúreas. El decaimiento lineal, al destruir la información más rápidamente, evita estos estados ambiguos y permite que el argmax durante la generación seleccione categorías coherentes.
@@ -137,7 +137,7 @@ Para investigar si la severa degradación del TVAE ($-24.04\%$ en F1 respecto al
 \centering
 \caption{Estudio de Ablación sobre Hiperparámetros del TVAE}
 \label{tab:ablation_tvae}
-\begin{tabular}{>{\raggedright\arraybackslash}p{4.8cm} c c r c r}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c c r c r}
 \toprule
 \textbf{Configuración} & \textbf{LF} & \textbf{Dim.} & \textbf{WD Media} & \textbf{F1} & \textbf{Gap} \\
 \midrule
@@ -148,7 +148,7 @@ V4 --- Mayor capacidad latente & 5 & 256 & 0.529 & 0.3386 & --42.67\% \\
 \midrule
 \rowcolor{uaxblue!10} \textbf{Mejor variante (V3)} & \textbf{10} & \textbf{128} & \textbf{1.194} & \textbf{0.4795} & \textbf{--18.81\%} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 \smallskip
 {\footnotesize \textit{Nota:} LF = \textit{loss\_factor}; Dim. = \textit{embedding\_dim}.}
