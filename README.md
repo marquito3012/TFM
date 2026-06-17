@@ -135,8 +135,8 @@ El proyecto está dockerizado para garantizar la reproducibilidad del entorno y 
 ## 🟪 Fase 6: Impacto Empresarial y Memoria Final (Semanas 11-12) 🚧 EN CURSO
 - [x] **Análisis Time-to-Data:** Cuantificación del ahorro burocrático finalizada. Reducción del **98.4%** en el tiempo de acceso (de meses a < 24h).
 - [x] **Escalabilidad:** Evaluación de MLOps completada. Framework listo para producción vía Docker y APIs asíncronas con soporte GPU.
-- [ ] **Redacción de Memoria:** Completar los capítulos de la carpeta Memoria/chapters en LaTex.
-- [ ] **Bibliografía:** Asegurar que todas las referencias (El Emam, Stadler, Xu, etc.) estén correctamente citadas.
+- [x] **Redacción de Memoria:** Completar los capítulos de la carpeta Memoria/chapters en LaTex.
+- [x] **Bibliografía:** Asegurar que todas las referencias (El Emam, Stadler, Xu, etc.) estén correctamente citadas.
 
 Para construir la imágen de docker, usamos (`--build` fuerza a Docker a leer la `Dockerfile` e instalar todas las dependencias del `requirements.txt`):
 ```

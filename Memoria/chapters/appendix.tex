@@ -7,7 +7,7 @@
 \setcounter{section}{0}
 \renewcommand{\thesection}{A.\arabic{section}}
 
-La presente sección suplementaria documenta especificaciones de bajo nivel, hiperparámetros exactos de instanciación y extractos de código fuente críticos que, por su densidad técnica, exceden la fluidez narrativa del cuerpo principal de la memoria, pero resultan indispensables para garantizar la reproducibilidad íntegra del Trabajo de Fin de Máster.
+La presente sección suplementaria documenta las especificaciones de bajo nivel e hiperparámetros exactos de instanciación de los modelos. Asimismo, se proporciona el enlace al repositorio público donde se encuentra disponible el código fuente completo del proyecto, garantizando la reproducibilidad íntegra del Trabajo de Fin de Máster.
 
 \section{Diccionario de Hiperparámetros de Entrenamiento}
 
@@ -45,119 +45,11 @@ Para garantizar una evaluación rigurosa y adaptada a la naturaleza de cada para
 \end{tabularx}
 \end{table}
 
-\section{Extractos de Código Fuente (Python)}
+\section{Repositorio de Código Fuente}
 
-El ecosistema de modelado se desarrolló empleando Python 3.10. A continuación, se adjuntan los bloques de código fundacionales encargados de orquestar el entrenamiento por difusión y la ejecución de la auditoría de memorización (DCR).
+El código fuente completo implementado para la limpieza del conjunto de datos, el preprocesamiento, el entrenamiento de los modelos generativos (CTGAN, TVAE y TabDDPM) y la ejecución de las auditorías de utilidad y privacidad (DCR y MIA) está alojado en el repositorio público de GitHub.
 
-\subsection{Instanciación y Entrenamiento de TabDDPM}
-
-El siguiente bloque demuestra la instanciación de la arquitectura de difusión de desarrollo propio en PyTorch, detallando el preprocesamiento mixto de variables y la topología de la red de eliminación de ruido (\textit{DenoisingMLP}) con sus bloques residuales y embeddings temporales.
-
-{\footnotesize
-\begin{verbatim}
-import torch
-import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
-
-# 1. Definición del Hardware (GPU / Compatible con CUDA y ROCm)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Desplegando entrenamiento en: {device}")
-
-# 2. Configuración de Hiperparámetros de Referencia (V1)
-tabddpm_config = {
-    'epochs': 1000,
-    'batch_size': 4096,
-    'T': 1000,                     # Pasos de difusión
-    'noise_schedule': 'linear',    # Cadena lineal de betas
-    'hidden_dims': [512, 512, 512],# Capas de ResBlocks
-    'lr': 1e-3,
-    'weight_decay': 1e-4
-}
-
-# 3. Inicialización de Preprocesador y Codificación Mixta
-# (Escala 9 continuas y codifica 30 categóricas a 139-dim)
-preprocessor = TabularPreprocessor(num_cols=num_cols, cat_cols=cat_cols)
-preprocessor.fit(real_patient_dataframe)
-X_scaled = preprocessor.transform(real_patient_dataframe)
-
-# 4. Creación del Loader del Dataset
-dataset = TensorDataset(torch.FloatTensor(X_scaled))
-loader = DataLoader(dataset, batch_size=tabddpm_config['batch_size'], shuffle=True)
-
-# 5. Instanciación de la Red de Denoising (1.097.483 parámetros)
-denoiser = DenoisingMLP(
-    input_dim=preprocessor.input_dim,          # 139 dimensiones
-    hidden_dims=tabddpm_config['hidden_dims'],  # [512, 512, 512] con ResBlocks
-    dropout=0.0
-).to(device)
-
-# 6. Definición de Pérdida (MSE) y Optimizadores
-optimizer = torch.optim.AdamW(
-    denoiser.parameters(), 
-    lr=tabddpm_config['lr'], 
-    weight_decay=tabddpm_config['weight_decay']
-)
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-    optimizer, 
-    T_max=tabddpm_config['epochs']
-)
-
-# 7. Ejecución del Entrenamiento (Difusión Markov con T=1000)
-for epoch in range(tabddpm_config['epochs']):
-    denoiser.train()
-    for batch in loader:
-        x_0 = batch[0].to(device)
-        t = torch.randint(0, tabddpm_config['T'], (x_0.shape[0],), device=device)
-        noise = torch.randn_like(x_0)
-        
-        # Proceso Forward de Difusión
-        x_t = schedule.q_sample(x_0, t, noise)
-        
-        # Predicción del Ruido vía DenoisingMLP
-        predicted_noise = denoiser(x_t, t)
-        loss = nn.functional.mse_loss(predicted_noise, noise)
-        
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-    scheduler.step()
-\end{verbatim}}
-
-\subsection{Auditoría de Memorización: Distancia al Vecino más Cercano (DCR)}
-
-Para certificar la privacidad y asegurar el cumplimiento del dictamen del Artículo 29, se implementó el siguiente algoritmo de búsqueda en árbol, calculando el DCR para detectar memorización nula.
-
-{\footnotesize
-\begin{verbatim}
-from sklearn.neighbors import NearestNeighbors
-import numpy as np
-
-def calculate_dcr(real_data, synthetic_data):
-    """
-    Calcula la Distance to Closest Record (DCR) entre los tensores 
-    sintéticos y el conjunto biológico original.
-    """
-    # Instanciación de árbol de búsqueda hiper-dimensional
-    nn_model = NearestNeighbors(n_neighbors=1, algorithm='ball_tree', p=2)
-    nn_model.fit(real_data)
-    
-    # Búsqueda de distancias para cada gemelo sintético
-    distances, indices = nn_model.kneighbors(synthetic_data)
-    
-    min_dcr = np.min(distances)
-    mean_dcr = np.mean(distances)
-    
-    print(f"Auditoría DCR Finalizada.")
-    print(f"Distancia Mínima (Peor Caso): {min_dcr:.4f}")
-    
-    # Verificación de Seguridad Normativa
-    if min_dcr > 0.0:
-        print("[SUCCESS] No se detectó memorización fotográfica (DCR > 0).")
-    else:
-        print("[CRITICAL] Filtración de datos detectada. Riesgo GDPR.")
-        
-    return distances
-
-# Ejecución de la auditoría sobre la matriz estandarizada
-dcr_distances = calculate_dcr(real_tensor_scaled, synthetic_tensor_scaled)
-\end{verbatim}}
+Se puede acceder al repositorio a través del siguiente enlace:
+\begin{center}
+    \url{https://github.com/marquito3012/TFM}
+\end{center}
